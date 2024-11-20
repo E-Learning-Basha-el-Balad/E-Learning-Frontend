@@ -1,4 +1,4 @@
-### Updated Frontend Folder Structure for E-Learning Platform (Based on Lab 7 Next.js Tutorial)
+### Updated Frontend Folder Structure
 
 ```
 frontend/
@@ -74,7 +74,7 @@ frontend/
 └── README.md                    # Project documentation
 ```
 
-### Packages You Have Installed:
+### Packages Installed:
 - **`axios`**: HTTP client for making API requests.
 - **`date-fns`**: Utility library for date manipulation.
 - **`lodash`**: Utility functions for various data operations.
@@ -89,11 +89,9 @@ frontend/
 - **`eslint-config-next`**: ESLint configuration for Next.js.
 - **`postcss`**: Tool for transforming CSS with JavaScript plugins.
 
-### Updated Key Features of Folder Structure:
+### Key Features of Folder Structure:
 - **Next.js Conventions**: Added key files such as **`layout.tsx`**, **`loading.tsx`**, **`error.tsx`**, **`not-found.tsx`** to conform to Next.js routing conventions.
 - **Routing and Layouts**: Included **route groups**, **dynamic routes**, **nested routes**, and **parallel routes** as per the tutorial guidelines.
 - **Private and Intercepted Routes**: Incorporated **private folders** for internal files and **intercepted routes** for modal-like behavior without changing context.
 - **Components and Pages**: Simplified reusable components and ensured **page.tsx** files are created for each route.
 - **Services, Hooks, and Context**: Organized API services, custom hooks, and global context for maintainable state and data management.
-
-This updated structure reflects the recommended practices outlined in the Next.js Lab 7 tutorial and aims to enhance scalability, maintainability, and ease of development for your e-learning platform.
