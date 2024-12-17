@@ -7,6 +7,7 @@ import NavBar from "@/components/ui/Nav";
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import Image from 'next/image';
 import { error } from "console";
+import { Router } from "next/router";
 
 interface User {
   _id: string;
@@ -32,6 +33,7 @@ const HomePage = () => {
   const[enrolledCourses,SetEnrolledCourses]= useState<Types.ObjectId[]>();
   const[createdCourses,SetCreatedCourses]= useState<Types.ObjectId[]>();
   const [guest, setGuest] = useState<boolean>(false);
+  const router = useRouter();
   let new_user;
 
   const setUser =(new_user:User)=>{
@@ -42,13 +44,7 @@ const HomePage = () => {
     SetEnrolledCourses(new_user.enrolledCourses)
     SetCreatedCourses(new_user.createdCourses)
 
-
-
-
   }
-
-
-
 
 
   useEffect(() => {
@@ -79,7 +75,9 @@ const HomePage = () => {
     fetchData();
   }, []); 
 
-
+  const handleBrowseCourses = () => {
+    router.push('./Courses/AllCourses'); // Navigate to the courses page
+  };
 
   return (
     <>
@@ -124,17 +122,18 @@ const HomePage = () => {
     Start your ascent today and reach new peaks in your learning journey!
   </p>
   <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-    <button
-      className="btn btn-outline-primary rounded-pill"
-      style={{
-        backgroundColor: 'white',
-        color: '#fa2fb5',
-        borderColor: '#fa2fb5'
-      }}
-    >
-      Browse our course selection
-    </button>
-  </div>
+        <button
+          className="btn btn-outline-primary rounded-pill"
+          style={{
+            backgroundColor: 'white',
+            color: '#fa2fb5',
+            borderColor: '#fa2fb5'
+          }}
+          onClick={handleBrowseCourses} // Add the navigation handler
+        >
+          Browse our course selection
+        </button>
+      </div>
 </div>
   </>
   );
