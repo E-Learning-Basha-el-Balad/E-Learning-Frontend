@@ -1,83 +1,46 @@
 'use client'
-import React from "react";
 import axios from "axios";
-import { useActionState, useState,useEffect } from "react";
+import React from "react";
+import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
-import NavBar from "@/components/ui/Nav";
-import mongoose, { Schema, Document, Types } from 'mongoose';
 import Image from 'next/image';
-import { error } from "console";
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  gpa: number;
-  enrolledCourses: Types.ObjectId[]; // Assuming this is an array of course IDs or names
-  createdCourses: Types.ObjectId[];  // Same as above
-  createdAt: string; // or Date, depending on how it's stored
-  updatedAt: string; // or Date
-  __v: number;
-}
+const loginPage = () => {
+  const [email, setEmail] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [show,setShow]= useState<boolean>(false)
+  const router = useRouter();
+  //const [state,formAction]=useActionState(login,{message:''})
 
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-const HomePage = () => {
-  const [email, setEmail] = useState<string>(); 
-  const [role, setRole] = useState<string>();
-  const [name, setName] = useState<string>();
-  const[id,setId]= useState<string>();
-  const[enrolledCourses,SetEnrolledCourses]= useState<Types.ObjectId[]>();
-  const[createdCourses,SetCreatedCourses]= useState<Types.ObjectId[]>();
-  const [guest, setGuest] = useState<boolean>(false);
-  let new_user;
-
-  const setUser =(new_user:User)=>{
-    setId(new_user._id)
-    setName(new_user.name)
-    setEmail(new_user.email)
-    setRole(new_user.role)
-    SetEnrolledCourses(new_user.enrolledCourses)
-    SetCreatedCourses(new_user.createdCourses)
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    
+    const response = await axios.post('/api/login', {
+      email: email,
+      password: password,
+    }, {
+      headers: {
+        'Content-Type': 'application/json', // Sending JSON body
+      },
+    });
 
 
-
-
-  }
-
-
-
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
-
-  
-        if (response.status === 401) {
-          setGuest(true);
-          return;
-        }
-  
-        if (response.status === 200) {
-          const new_user = response.data;
-          setUser(new_user);
-          setGuest(false);
-        }
-      } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          setGuest(true);
-          return;
-        }
-        console.error('Error fetching user data:', error.response?.data || error.message);
-      }
-    };
-  
-    fetchData();
-  }, []); 
+    //setMessage(response.message)
+    if(response.data.status =='false'){
+      
+      setShow(true)
+     }
+     else{
+      setShow(false)
+      router.push('/')
+     }
+     setMessage(response.data.message)
+};
 
 
 
@@ -108,36 +71,118 @@ const HomePage = () => {
         align-items: center;
       }
     `}</style>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      maxWidth: '1200px', // Limit max width of the container
+      width: '100%',
+      gap: '20px', // Add a consistent gap
+      padding: '20px'
+    }}>
+      {/* Left side with logo */}
+      <div style={{
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column', // Stack logo and text vertically
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+        <Image
+          src="/AA.png" // Adjust your logo path
+          alt="Logo"
+          width={500} // Adjust size
+          height={500}
+        />
+        <p style={{
+          color: '#fa2fb5',
+          marginTop: '-100px', // Add spacing below the logo
+          fontSize: '18px', // Adjust text size
+          textAlign: 'center' // Center-align the text
+        }}>
+                      Your learning adventure starts here.
+        </p>
+      </div>
 
-<div className="container">
-  <NavBar isGuest={guest}  name={name} />
-  <h1 className="title" style={{ color: 'white' }}>Welcome to Alpine Academy</h1>
-  <p className="content" style={{ color: 'white' }}>
-    Climb the Peaks of Knowledge with Us!
-  </p>
-  <br /><br />
-  <p className="content" style={{ fontFamily: 'CustomFont2', color: 'white' }}>
-    Just like every mountain has its summit, every learner has their potential waiting to be reached. At Alpine Academy, we’re here to help you scale those heights. Whether you're mastering new skills, exploring fresh topics, or forging your path to success, we've got your back every step of the way.
-  </p>
-  <br /><br />
-  <p className="content" style={{ color: 'white' }}>
-    Start your ascent today and reach new peaks in your learning journey!
-  </p>
-  <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-    <button
-      className="btn btn-outline-primary rounded-pill"
-      style={{
-        backgroundColor: 'white',
-        color: '#fa2fb5',
-        borderColor: '#fa2fb5'
-      }}
-    >
-      Browse our course selection
-    </button>
-  </div>
-</div>
+      {/* Right side with login form */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+        <div className="card" style={{
+          width: "30rem",
+          height: "auto",
+          padding: "20px", // Add padding inside the card
+          borderRadius: "15px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)"
+        }}>
+          <form onSubmit={handleSubmit}>
+            <div className="card-body">
+              <h5 className="card-title" style={{ textAlign: "center" }}>Welcome Back!</h5>
+
+              <div className="mb-3">
+                <label htmlFor="emailInput" className="form-label">Email address</label>
+                <input
+                  type="email"
+                  className="form-control rounded-pill"
+                  id="emailInput"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ fontFamily: 'CustomFont2' }}
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="passwordInput" className="form-label">Password</label>
+                <input
+                  type="password"
+                  className="form-control rounded-pill"
+                  id="passwordInput"
+                  aria-describedby="passwordHelpBlock"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  
+                  style={{ fontFamily: 'CustomFont2' }}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+                <button
+                  type="submit"
+                  className="btn btn-outline-primary rounded-pill"
+                  style={{
+                    backgroundColor: 'white',
+                    color: '#fa2fb5',
+                    borderColor: '#fa2fb5'
+                  }}
+                >
+                  Login
+                </button>
+              </div>
+              <div>
+            
+                
+               {message && <div className={`alert ${show ? "alert-danger" : "alert-success"}`}  role="alert" style={{ marginTop: "20px" }}>{message}
+                </div>}
+                <div style={{ paddingLeft: '50px'  , marginTop: '20px'}}>
+              <p>
+              Not a member?  
+             <a href="/register" style={{ color: '#fa2fb5' }}> Register here</a>
+             </p>
+              </div>
+                </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </>
   );
 };
 
-export default HomePage;
+export default loginPage;
