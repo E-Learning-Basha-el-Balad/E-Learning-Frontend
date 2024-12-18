@@ -19,6 +19,7 @@ export interface Course {
   instructor_details: Instructor[]; // Array of instructor details
   created_at?: string; // Optional timestamp from backend schema
   updated_at?: string; // Optional timestamp from backend schema
+  DifficultyLevel: DifficultyLevel; // Enum value for the difficulty level
 }
 
 export interface Instructor {
@@ -29,7 +30,7 @@ export interface Instructor {
   role: string; // Instructor's role (e.g., 'instructor')
   gpa: number; // Instructor's GPA (assuming it's part of the user schema)
   enrolledCourses: string[]; // List of enrolled courses (if applicable)
-  createdCourses: string[]; // List of created courses (if applicable)
+  courses: Course[]; // List of created courses (if applicable)
   createdAt: string; // Date the instructor was created
   updatedAt: string; // Date the instructor was last updated
   __v: number; // Version key used by MongoDB for internal tracking
