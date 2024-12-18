@@ -2,10 +2,9 @@
 import { useState } from "react";
 import { Course } from "../../types/Course";
 
-const CourseDetailsPage = ({ course,isGuest }: { course: Course ,isGuest:boolean}) => {
-  // State for the course details
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+const CourseDetailsPage = ({ course, isGuest }: { course: Course, isGuest: boolean }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen d-flex justify-content-center align-items-center bg-gradient-to-br from-gray-100 to-gray-300 p-4">

@@ -33,7 +33,10 @@ const CreateCourse = () => {
       students, // Use the updated students array
       created_at: createdAt,
       userId,
-      DifficultyLevel: DifficultyLevel.Beginner
+      DifficultyLevel: DifficultyLevel.Beginner,
+      isAvailable: false,
+      keywords: [],
+      instructor_details: []
     };
 
     try {
