@@ -51,12 +51,6 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
-
-  
-        if (response.status === 401) {
-          setGuest(true);
-          return;
-        }
   
         if (response.status === 200) {
           const new_user = response.data;
@@ -76,8 +70,18 @@ const HomePage = () => {
   }, []); 
 
   const handleBrowseCourses = () => {
-    router.push('./Courses/AllCourses'); // Navigate to the courses page
+
+    if(guest == true){
+      localStorage.setItem('isGuest','true')
+    }
+    else if(guest == false){
+      localStorage.setItem('isGuest','false')
+    }
+    
+    router.push('./Courses'); 
   };
+  
+    
 
   return (
     <>
