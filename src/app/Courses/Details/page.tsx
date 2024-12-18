@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Course } from "../../types/Course";
 
-const CourseDetailsPage = ({ course,isGuest }: { course: Course ,isGuest:boolean}) => {
+const CourseDetailsPage = ({ course,guest }: { course: Course ,guest:boolean}) => {
   // State for the course details
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
@@ -39,10 +39,20 @@ const CourseDetailsPage = ({ course,isGuest }: { course: Course ,isGuest:boolean
               <div className="col-md-4 font-weight-bold text-black">Version:</div>
               <div className="col-md-8">{course.versionNumber}</div>
             </div>
+            <div className="row mb-4 w-100">
+          <div className="col-md-4 font-weight-bold text-black">Keywords:</div>
+            <div className="col-md-8">
+       <ul>
+      {course.keywords.map((keyword, index) => (
+        <li key={index}>{keyword}</li>
+      ))}
+      </ul>
+      </div>
+    </div>
 
             {/* Centered and Styled Enroll Button */}
             <div className="d-flex justify-content-center mt-4 w-100">
-              {isGuest && <a href="/login"> <button
+              {guest && <a href="/login"> <button
                 className="btn btn-pink rounded-pill"
                 type="button"
                 
@@ -58,7 +68,7 @@ const CourseDetailsPage = ({ course,isGuest }: { course: Course ,isGuest:boolean
               </button>
               </a>
               }
-              {!isGuest && <button
+              {!guest && <button
                 className="btn btn-pink rounded-pill"
                 type="button"
                 style={{

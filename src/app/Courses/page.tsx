@@ -1,44 +1,79 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Course } from '../types/Course'
+import { Course } from "../types/Course";
 import CourseDetailsPage from "./Details/page";
 import { FaBookOpen } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { FaArrowLeft } from 'react-icons/fa';
 
 const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]); // Original course data
+  const [searchcourses, setSearchcourses] = useState<Course[]>([]); // Filtered course data for search
+  const [searchQuery, setSearchQuery] = useState("");
   const [guest, setGuest] = useState<boolean>(false);
+  const [userId, setUserId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const router = useRouter();
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    // Filter courses based on title or description
+    const filtered = courses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(query) ||
+        course.description.toLowerCase().includes(query) ||
+        course.keywords.some((keyword) => keyword.toLowerCase().includes(query.toLowerCase()))
+    );
+
+    setSearchcourses(filtered);
+  };
+
+  // Fetch user data and courses on initial load
   useEffect(() => {
-    // Now safe to access localStorage because this will run in the browser only
-    const guest_local = localStorage.getItem("isGuest");
-    if (guest_local === "false") {
-      setGuest(false);
-    } else {
-      setGuest(true);
-    }
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/auth/userData", {
+          withCredentials: true,
+        });
 
-  
+        if (response.status === 200) {
+          const new_user = response.data;
+          setUserId(new_user._id);
+          setGuest(false);
+        }
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          setGuest(true);
+          return;
+        }
+        console.error(
+          "Error fetching user data:",
+          error.response?.data || error.message
+        );
+      }
+    };
 
-
-  useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/courses/Allcourses");
+        const response = await axios.get(
+          "http://localhost:3000/courses/Allcourses"
+        );
         setCourses(response.data);
+        setSearchcourses(response.data); // Initialize with all courses
       } catch (err) {
         setError("Failed to fetch courses. Please try again later.");
       }
     };
 
+    fetchData();
     fetchCourses();
   }, []);
 
+  // Handle card click event
   const handleCardClick = (course: Course) => setSelectedCourse(course);
 
   return (
@@ -73,25 +108,46 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
               onClick={() => setSelectedCourse(null)}
               className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4 space-x-2 transition-colors duration-300"
             >
-              <FaBookOpen className="mr-2" />
-              <span>Back to All Courses</span>
+               <FaArrowLeft className="mr-2" />
+               <span>Back to All Courses</span>
             </button>
-            <CourseDetailsPage course={selectedCourse} isGuest={guest} />
+            <CourseDetailsPage course={selectedCourse} guest={guest} />
           </div>
         ) : (
           <div className="max-w-7xl mx-auto">
             <h1 className="text-5xl font-extrabold text-white bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-12 text-center mt-0">
-  Explore Courses
-</h1>
+              Explore Courses
+            </h1>
 
+            <div className="container">
+              <div className="row justify-content-center">
+                <div className="col-md-6">
+                  <div className="search-container">
+                    <input
+                      type="text"
+                      className="form-control search-input"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      placeholder="Search..."
+                      style={{ fontFamily: "CustomFont2, sans-serif" }}
+                    />
+                    <i className="fas fa-search search-icon"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <br></br>
 
             {error ? (
               <p className="text-center text-red-600 text-xl">{error}</p>
-            ) : courses.length === 0 ? (
-              <p className="text-center text-gray-600 text-xl">No courses found</p>
+            ) : searchcourses.length === 0 ? (
+              <p className="text-center text-gray-600 text-xl">
+                No courses found
+              </p>
             ) : (
               <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                {courses.map((course) => (
+                {searchcourses.map((course) => (
                   <div
                     key={course._id}
                     className="col"
@@ -109,10 +165,18 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
                       </div>
 
                       {/* Course Details */}
-                      <div className="card-body" style={{ fontFamily: 'CustomFont2, sans-serif'}} >
+                      <div
+                        className="card-body"
+                        style={{ fontFamily: "CustomFont2, sans-serif" }}
+                      >
                         <h5 className="card-title text-dark">{course.title}</h5>
                         <p className="card-text">
-                          <strong>Instructor:</strong> {course.instructor_details[0].name || "N/A"}
+                          <strong>Instructor:</strong>{" "}
+                          {course.instructor_details[0].name || "N/A"}
+                        </p>
+                        <p className="card-text">
+                          <strong>Category:</strong>{" "}
+                          {course.category || "N/A"}
                         </p>
                       </div>
                     </div>

@@ -71,12 +71,6 @@ const HomePage = () => {
 
   const handleBrowseCourses = () => {
 
-    if(guest == true){
-      localStorage.setItem('isGuest','true')
-    }
-    else if(guest == false){
-      localStorage.setItem('isGuest','false')
-    }
     
     router.push('./Courses'); 
   };
