@@ -9,8 +9,7 @@ const InstructorDetailsPage = ({ Instructor, isGuest }: { Instructor: Instructor
 
   // Handle course click
   const handleCardClick = (course: any) => {
-    // Handle course click logic (e.g., navigate to course details)
-    console.log(course);
+    window.location.href = `/Courses/${course._id}`;
   };
 
   return (
@@ -38,10 +37,14 @@ const InstructorDetailsPage = ({ Instructor, isGuest }: { Instructor: Instructor
                     {Instructor.courses.map((course, index) => (
                       <li
                         key={course._id || index}
-                        onClick={() => handleCardClick(course)}
+                       
                         className="mb-4 cursor-pointer"
                       >
-                        <span className="text-lg text-black">{course.title}</span> {/* Text will be centered */}
+                        <span className="text-lg text-black">
+                           <a href={`/Courses/${course._id}`} className="hover:text-indigo-600">
+                               {course.title}
+                           </a>
+                        </span> {/* Text will be centered */}
                       </li>
                     ))}
                   </ul>

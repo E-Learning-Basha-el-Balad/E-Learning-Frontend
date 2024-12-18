@@ -1,41 +1,37 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { Course } from '../types/Course'
-import CourseDetailsPage from "./Details/page";
-import { FaBookOpen } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import CourseDetailsPage from "../Details/page"; // Adjust the import path
+import { Course } from "../../types/Course"; // Adjust the import path
 
-const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [guest, setGuest] = useState<boolean>(false);
-  const [error, setError] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const router = useRouter();
+export default function CourseById() {
+  const params = useParams(); // Get route parameters
+  const { id } = params; // Extract the 'id' from the params
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Now safe to access localStorage because this will run in the browser only
-    const guest_local = localStorage.getItem("isGuest");
-    if (guest_local === "false") {
-      setGuest(false);
-    } else {
-      setGuest(true);
+    if (id) {
+      // Fetch course details using the course ID with axios
+      axios
+        .get(`http://localhost:3000/Courses/${id}`) // Adjust the API URL as needed
+        .then((response) => {
+          setCourse(response.data); // Set the course data
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError("Failed to fetch course details. Please try again later."); // Handle fetch errors
+          setLoading(false);
+        });
     }
-  }, []);
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/courses/Allcourses");
-        setCourses(response.data);
-      } catch (err) {
-        setError("Failed to fetch courses. Please try again later.");
-      }
-    };
+  }, [id]);
 
-    fetchCourses();
-  }, []);
-
-  const handleCardClick = (course: Course) => setSelectedCourse(course);
+  if (loading) return <p>Loading course details...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!course) return <p>No course found.</p>;
 
   return (
     <>
@@ -62,65 +58,10 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
           overflow-x: hidden;
         }
       `}</style>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 font-sans">
-        {selectedCourse ? (
-          <div>
-            <button
-              onClick={() => setSelectedCourse(null)}
-              className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4 space-x-2 transition-colors duration-300"
-            >
-              <FaBookOpen className="mr-2" />
-              <span>Back to All Courses</span>
-            </button>
-            <CourseDetailsPage course={selectedCourse} isGuest={guest} />
-          </div>
-        ) : (
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-5xl font-extrabold text-white bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-12 text-center mt-0">
-  Explore Courses
-</h1>
-
-
-            {error ? (
-              <p className="text-center text-red-600 text-xl">{error}</p>
-            ) : courses.length === 0 ? (
-              <p className="text-center text-gray-600 text-xl">No courses found</p>
-            ) : (
-              <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                {courses.map((course) => (
-                  <div
-                    key={course._id}
-                    className="col"
-                    onClick={() => handleCardClick(course)}
-                  >
-                    <div className="card h-100 cursor-pointer">
-                      {/* Course Image Placeholder */}
-                      <div
-                        className="card-img-top bg-light d-flex align-items-center justify-content-center"
-                        style={{ height: "200px" }}
-                      >
-                        <span className="text-gray-600 text-2xl font-bold opacity-50">
-                          {course.category || "Course"}
-                        </span>
-                      </div>
-
-                      {/* Course Details */}
-                      <div className="card-body" style={{ fontFamily: 'CustomFont2, sans-serif'}} >
-                        <h5 className="card-title text-dark">{course.title}</h5>
-                        <p className="card-text">
-                          <strong>Instructor:</strong> {course.instructor_details[0].name || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+      
+      <div className="min-h-screen bg-gray-100 p-4">
+        <CourseDetailsPage course={course} isGuest={false} />
       </div>
     </>
   );
-};
-
-export default AllCoursesPage;
+}
