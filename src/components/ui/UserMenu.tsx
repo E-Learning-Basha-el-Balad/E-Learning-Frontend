@@ -1,14 +1,16 @@
+'use client'
 import React from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FaUserCircle } from 'react-icons/fa'; // Import an icon (e.g., user icon)
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useRouter } from 'next/navigation'
 import axios from 'axios';
-
-interface UserMenuProps {
-  name: string | undefined;
+interface userMenuProps{
+    name:string
+    role:string
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ name }) => {
+const UserMenu: React.FC<userMenuProps> = ({ name , role }) => {
   const handleLogout = async () => {
     try {
       await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
@@ -18,6 +20,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ name }) => {
     }
   };
 
+  const router = useRouter();
+
+  function handleDashboard() {
+    router.push(`/dashboard?role=${role}`);
+  }
   return (
     <Dropdown>
       <Dropdown.Toggle
@@ -43,7 +50,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ name }) => {
         overflowY: 'auto',  // Allow scrolling if content exceeds max height
       }}>
         <h3>Welcome {name}</h3>
-        <Dropdown.Item href="#/dashboard">Dashboard</Dropdown.Item>
+        <Dropdown.Item onClick={handleDashboard}>Dashboard</Dropdown.Item>
         <Dropdown.Item onClick={handleLogout}>Log Out</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>

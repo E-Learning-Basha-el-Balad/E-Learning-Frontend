@@ -1,109 +1,133 @@
 "use client";
-import { useState, useEffect } from "react";
-import fetcher from "../../utils/fetcher";
+import { useState } from "react";
 import { Course } from "../../types/Course";
+import axios from "axios";
 
-const CourseDetailsPage = ({ courseIdInput }: { courseIdInput: string }) => {
-  const [course, setCourse] = useState<Course | null>(null); // State for the course details
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+const CourseDetailsPage = ({ course, guest }: { course: Course; guest: boolean }) => {
+  // State for the course details
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [red, setRed] = useState<boolean | null>(null);
 
-  // Fetch course details when courseIdInput changes
-  const fetchCourseDetails = async () => {
-    if (!courseIdInput) return;
-
-    setLoading(true);
-    setError(null);
-
+  const Enroll = async () => {
     try {
-      // Fetch course details from the backend
-      const data = await fetcher(
-        `http://localhost:3000/courses/${courseIdInput}`,
-        { method: "GET" }
+      const response = await axios.post(
+        "http://localhost:3000/courses/enroll",
+        {
+          courseId: course._id,
+        },
+        { withCredentials: true }
       );
-      setCourse(data); // Set the fetched course details
-    } catch (err) {
-      setError("Failed to fetch course details");
-    } finally {
-      setLoading(false);
+
+      if (response.status == 201) {
+        setMessage("Enrolled Successfully");
+        setRed(false);
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 400) {
+        setMessage("Error while enrolling");
+        setRed(true);
+      }
+      if (error.response && error.response.status === 409) {
+        setMessage("Already Enrolled");
+        setRed(true);
+      }
     }
   };
 
-  // Automatically fetch details when the component is mounted or courseIdInput changes
-  useEffect(() => {
-    fetchCourseDetails();
-  }, [courseIdInput]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
-      <div className="p-8 bg-white shadow-xl rounded-lg w-full max-w-3xl">
-        <h1 className="text-2xl font-bold mb-6 text-center text-black">
-          Course Details
-        </h1>
+    <div className="min-h-screen d-flex justify-content-center align-items-center bg-gradient-to-br from-gray-100 to-gray-300 p-4">
+      <div className="card shadow-lg p-4 w-100 w-md-75 w-lg-50">
+        <h1 className="card-title text-center text-black mb-4">{course.title}</h1>
 
-        {/* Loading or error message */}
-        {loading && <p className="text-center text-gray-600">Loading...</p>}
-        {error && <p className="text-center text-red-600">{error}</p>}
-
-        {/* Display Course Details if available */}
+        {/* Center the inner card */}
         {course && (
-          <div className="mt-6 bg-gray-50 p-6 shadow rounded-lg">
-            <h1 className="text-2xl font-bold mb-4 text-black">
-              {course.title}
-            </h1>
-            <table className="w-full border-collapse text-black">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="px-4 py-2 text-left border-b">Field</th>
-                  <th className="px-4 py-2 text-left border-b">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-white">
-                  <td className="px-4 py-2 border-b">Title</td>
-                  <td className="px-4 py-2 border-b">
-                    {course.title || "N/A"}
-                  </td>
-                </tr>
-                <tr className="bg-white">
-                  <td className="px-4 py-2 border-b">Description</td>
-                  <td className="px-4 py-2 border-b">
-                    {course.description || "N/A"}
-                  </td>
-                </tr>
-                <tr className="bg-gray-100">
-                  <td className="px-4 py-2 border-b">Category</td>
-                  <td className="px-4 py-2 border-b">{course.category}</td>
-                </tr>
-                <tr className="bg-white">
-                  <td className="px-4 py-2 border-b">Level</td>
-                  <td className="px-4 py-2 border-b">{course.level}</td>
-                </tr>
-                <tr className="bg-gray-100">
-                  <td className="px-4 py-2 border-b">Instructor</td>
-                  <td className="px-4 py-2 border-b">
-                    {course.userId || "Unassigned"}
-                  </td>
-                </tr>
-                <tr className="bg-white">
-                  <td className="px-4 py-2 border-b">Version</td>
-                  <td className="px-4 py-2 border-b">{course.versionNumber}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div
+            className="card-body d-flex flex-column align-items-center"
+            style={{ fontFamily: "CustomFont2, sans-serif" }}
+          >
+            {/* Course Info Section */}
+            <div className="row mb-4 w-100">
+              <div className="col-md-4 font-weight-bold text-black">Description:</div>
+              <div className="col-md-8">{course.description || "N/A"}</div>
+            </div>
+            <div className="row mb-4 w-100">
+              <div className="col-md-4 font-weight-bold text-black">Category:</div>
+              <div className="col-md-8">{course.category}</div>
+            </div>
+            <div className="row mb-4 w-100">
+              <div className="col-md-4 font-weight-bold text-black">Level:</div>
+              <div className="col-md-8">{course.level}</div>
+            </div>
+            <div className="row mb-4 w-100">
+              <div className="col-md-4 font-weight-bold text-black">Instructor:</div>
+              <div className="col-md-8">{course.instructor_details[0].name || "Unassigned"}</div>
+            </div>
+            <div className="row mb-4 w-100">
+              <div className="col-md-4 font-weight-bold text-black">Version:</div>
+              <div className="col-md-8">{course.versionNumber}</div>
+            </div>
+            <div className="row mb-4 w-100">
+              <div className="col-md-4 font-weight-bold text-black">Keywords:</div>
+              <div className="col-md-8">
+                <ul>
+                  {course.keywords.map((keyword, index) => (
+                    <li key={index}>{keyword}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
-            <h2 className="mt-6 text-xl font-semibold text-black">
-              Enrolled Students
-            </h2>
-            {course.students && course.students.length > 0 ? (
-              <ul className="mt-2 list-disc pl-5 text-black">
-                {course.students.map((studentId, index) => (
-                  <li key={index}>{studentId}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-2 text-gray-600">No students enrolled yet.</p>
-            )}
+            {/* Centered and Styled Enroll Button */}
+            <div className="d-flex justify-content-center mt-4 w-100">
+              {guest && (
+                <a href="/login">
+                  <button
+                    className="btn btn-pink rounded-pill"
+                    type="button"
+                    style={{
+                      backgroundColor: "#ec4899", // Pink color
+                      color: "#fff", // White text
+                      border: "none", // Remove border
+                      padding: "10px 30px", // Add some padding
+                      fontFamily: "CustomFont2", // Custom font
+                    }}
+                  >
+                    Login or Create an Account to enroll
+                  </button>
+                </a>
+              )}
+              {!guest && (
+                <button
+                  className="btn btn-pink rounded-pill"
+                  type="button"
+                  onClick={Enroll}
+                  style={{
+                    backgroundColor: "#ec4899", // Pink color
+                    color: "#fff", // White text
+                    border: "none", // Remove border
+                    padding: "10px 30px", // Add some padding
+                    fontFamily: "CustomFont2", // Custom font
+                  }}
+                >
+                  Enroll
+                </button>
+              )}
+            </div>
+
+            {/* Message Box */}
+            <div className="d-flex justify-content-center mt-4 w-100">
+              {message && (
+                <div
+                  className={`alert ${red ? "alert-danger" : "alert-success"}`}
+                  role="alert"
+                  style={{ marginTop: "20px" }}
+                >
+                  {message}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
