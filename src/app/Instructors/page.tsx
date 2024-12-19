@@ -1,80 +1,35 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Course } from "../types/Course";
-import CourseDetailsPage from "./Details/page";
+import { Course, Instructor } from '../types/Course'; // Renamed to Instructor
 import { FaBookOpen } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { FaArrowLeft } from 'react-icons/fa';
+import CourseDetailsPage from "../Courses/Details/page";
+import InstructorDetailsPage from "./details";
 
-const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
-  const [courses, setCourses] = useState<Course[]>([]); // Original course data
-  const [searchcourses, setSearchcourses] = useState<Course[]>([]); // Filtered course data for search
-  const [searchQuery, setSearchQuery] = useState("");
+const AllInstructorsPage = ({ isGuest }: { isGuest: boolean }) => {
+  const [instructors, setInstructors] = useState<Instructor[]>([]); // Renamed to instructors
   const [guest, setGuest] = useState<boolean>(false);
-  const [userId, setUserId] = useState<number | null>(null);
   const [error, setError] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
   const router = useRouter();
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
 
-    // Filter courses based on title or description
-    const filtered = courses.filter(
-      (course) =>
-        course.title.toLowerCase().includes(query) ||
-        course.description.toLowerCase().includes(query) ||
-        course.keywords.some((keyword) => keyword.toLowerCase().includes(query.toLowerCase()))
-    );
-
-    setSearchcourses(filtered);
-  };
-
-  // Fetch user data and courses on initial load
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInstructors = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/auth/userData", {
-          withCredentials: true,
-        });
-
-        if (response.status === 200) {
-          const new_user = response.data;
-          setUserId(new_user._id);
-          setGuest(false);
-        }
-      } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          setGuest(true);
-          return;
-        }
-        console.error(
-          "Error fetching user data:",
-          error.response?.data || error.message
-        );
-      }
-    };
-
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3000/courses/Allcourses"
-        );
-        setCourses(response.data);
-        setSearchcourses(response.data); // Initialize with all courses
+        const response = await axios.get("http://localhost:3000/users/instructors"); // Adjust URL as per API
+        setInstructors(response.data);
       } catch (err) {
-        setError("Failed to fetch courses. Please try again later.");
+        setError("Failed to fetch instructors. Please try again later.");
       }
     };
 
-    fetchData();
-    fetchCourses();
+    fetchInstructors();
   }, []);
 
-  // Handle card click event
-  const handleCardClick = (course: Course) => setSelectedCourse(course);
+  const handleCardClick = (instructor: Instructor) => setSelectedInstructor(instructor);
+
 
   return (
     <>
@@ -101,82 +56,57 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
           overflow-x: hidden;
         }
       `}</style>
+      
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 font-sans">
-        {selectedCourse ? (
+        {selectedInstructor ? (
           <div>
             <button
-              onClick={() => setSelectedCourse(null)}
+              onClick={() => setSelectedInstructor(null)}
               className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4 space-x-2 transition-colors duration-300"
             >
-               <FaArrowLeft className="mr-2" />
-               <span>Back to All Courses</span>
+              <FaBookOpen className="mr-2" />
+              <span>Back to All Instructors</span>
             </button>
-            <CourseDetailsPage course={selectedCourse} guest={guest} />
-          </div>
+            <InstructorDetailsPage Instructor={selectedInstructor} isGuest={false}></InstructorDetailsPage>
+            
+            {/* Render selected instructor details */}
+          
+            </div>
+    
         ) : (
           <div className="max-w-7xl mx-auto">
             <h1 className="text-5xl font-extrabold text-white bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-12 text-center mt-0">
-              Explore Courses
+              Explore Instructors
             </h1>
-
-            <div className="container">
-              <div className="row justify-content-center">
-                <div className="col-md-6">
-                  <div className="search-container">
-                    <input
-                      type="text"
-                      className="form-control search-input"
-                      value={searchQuery}
-                      onChange={handleSearchChange}
-                      placeholder="Search..."
-                      style={{ fontFamily: "CustomFont2, sans-serif" }}
-                    />
-                    <i className="fas fa-search search-icon"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <br></br>
 
             {error ? (
               <p className="text-center text-red-600 text-xl">{error}</p>
-            ) : searchcourses.length === 0 ? (
-              <p className="text-center text-gray-600 text-xl">
-                No courses found
-              </p>
+            ) : instructors.length === 0 ? (
+              <p className="text-center text-gray-600 text-xl">No instructors found</p>
             ) : (
               <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                {searchcourses.map((course) => (
+                {instructors.map((instructor) => (
                   <div
-                    key={course._id}
+                    key={instructor.email} // Assuming email is unique for each instructor
                     className="col"
-                    onClick={() => handleCardClick(course)}
+                    onClick={() => handleCardClick(instructor)}
                   >
                     <div className="card h-100 cursor-pointer">
-                      {/* Course Image Placeholder */}
+                      {/* Instructor Image Placeholder */}
                       <div
                         className="card-img-top bg-light d-flex align-items-center justify-content-center"
                         style={{ height: "200px" }}
                       >
                         <span className="text-gray-600 text-2xl font-bold opacity-50">
-                          {course.category || "Course"}
+                          {instructor.role || "Instructor"}
                         </span>
                       </div>
 
-                      {/* Course Details */}
-                      <div
-                        className="card-body"
-                        style={{ fontFamily: "CustomFont2, sans-serif" }}
-                      >
-                        <h5 className="card-title text-dark">{course.title}</h5>
+                      {/* Instructor Details */}
+                      <div className="card-body" style={{ fontFamily: 'CustomFont2, sans-serif' }}>
+                        <h5 className="card-title text-dark">{instructor.name}</h5>
                         <p className="card-text">
-                          <strong>Instructor:</strong>{" "}
-                          {course.instructor_details[0].name || "N/A"}
-                        </p>
-                        <p className="card-text">
-                          <strong>Category:</strong>{" "}
-                          {course.category || "N/A"}
+                          <strong>Email:</strong> {instructor.email}
                         </p>
                       </div>
                     </div>
@@ -191,4 +121,4 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
   );
 };
 
-export default AllCoursesPage;
+export default AllInstructorsPage;
