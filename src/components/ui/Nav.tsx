@@ -3,10 +3,11 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import UserMenu from './UserMenu';
 interface NavBarProps {
-  isGuest: boolean,
-  name:string | undefined
+  name:string
+  role: string
+  
 }
-const NavBar: React.FC<NavBarProps> = ({ isGuest , name }) =>  {
+const NavBar: React.FC<NavBarProps> = ({ role , name }) =>  {
   const router = useRouter();
   const loginRoute = () => {
     router.push(`/login`); // Replace with your desired route
@@ -103,9 +104,9 @@ const NavBar: React.FC<NavBarProps> = ({ isGuest , name }) =>  {
             </div>
           </div>
           <div className="navbar-nav ms-auto"> {/* Align to the right */}
-           { isGuest && <button  className="btn rounded-pill" onClick={loginRoute} type="button" style={{ fontFamily: 'CustomFont2' }}>Login</button>}
-           { isGuest && <button className="btn rounded-pill" onClick={registerRoute} type="button" style={{ marginLeft: '10px',fontFamily: 'CustomFont2' }}>Register</button>}
-            {!isGuest&& <UserMenu name={name}></UserMenu>}
+           { role=='guest' && <button  className="btn rounded-pill" onClick={loginRoute} type="button" style={{ fontFamily: 'CustomFont2' }}>Login</button>}
+           { role=='guest' && <button className="btn rounded-pill" onClick={registerRoute} type="button" style={{ marginLeft: '10px',fontFamily: 'CustomFont2' }}>Register</button>}
+            {!(role=='guest')&& <UserMenu role={role} name={name}></UserMenu>}
           </div>
         </div>
       </nav>

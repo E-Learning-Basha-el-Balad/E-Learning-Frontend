@@ -8,7 +8,7 @@ const loginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [show,setShow]= useState<boolean>(false)
+  const [red,setRed]= useState<boolean>(false)
   const router = useRouter();
   //const [state,formAction]=useActionState(login,{message:''})
 
@@ -31,13 +31,14 @@ const loginPage = () => {
 
 
     //setMessage(response.message)
-    if(response.data.status =='false'){
+    if(!response.data.success){
       
-      setShow(true)
+      setRed(true)
      }
      else{
-      setShow(false)
       router.push('/')
+      setRed(false)
+      
      }
      setMessage(response.data.message)
 };
@@ -167,7 +168,7 @@ const loginPage = () => {
               <div>
             
                 
-               {message && <div className={`alert ${show ? "alert-danger" : "alert-success"}`}  role="alert" style={{ marginTop: "20px" }}>{message}
+               {message && <div className={`alert ${red ? "alert-danger" : "alert-success"}`}  role="alert" style={{ marginTop: "20px" }}>{message}
                 </div>}
                 <div style={{ paddingLeft: '50px'  , marginTop: '20px'}}>
               <p>

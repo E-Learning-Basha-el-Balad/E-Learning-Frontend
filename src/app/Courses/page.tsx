@@ -34,7 +34,6 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
 
   // Fetch user data and courses on initial load
   useEffect(() => {
-<<<<<<< HEAD
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/auth/userData", {
@@ -58,17 +57,6 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
       }
     };
 
-=======
-    // Now safe to access localStorage because this will run in the browser only
-    const guest_local = localStorage.getItem("isGuest");
-    if (guest_local === "false") {
-      setGuest(false);
-    } else {
-      setGuest(true);
-    }
-  }, []);
-  useEffect(() => {
->>>>>>> a3012fb8c488508035cb759ab8f55de581bec66c
     const fetchCourses = async () => {
       try {
         const response = await axios.get(

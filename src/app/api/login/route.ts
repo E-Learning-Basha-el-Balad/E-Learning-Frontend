@@ -27,7 +27,6 @@ export async function POST(req:Request){
       const res=NextResponse.json({success:true,message:response.data.message})
 
       if(cookieHeader){
-        console.log(cookieHeader)
         res.headers.set('Set-Cookie',cookieHeader[0])
       }
       return res

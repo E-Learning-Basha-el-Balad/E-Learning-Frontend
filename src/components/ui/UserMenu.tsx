@@ -1,12 +1,20 @@
+'use client'
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FaUserCircle } from 'react-icons/fa'; // Import an icon (e.g., user icon)
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useRouter } from 'next/navigation'
 
 interface userMenuProps{
-    name:string | undefined
+    name:string
+    role:string
 }
 
-const UserMenu: React.FC<userMenuProps> = ({name }) => {
+const UserMenu: React.FC<userMenuProps> = ({name , role }) => {
+  const router = useRouter();
+
+  function handleDashboard() {
+    router.push(`/dashboard?role=${role}`);
+  }
   return (
     <Dropdown >
       <Dropdown.Toggle
@@ -32,7 +40,7 @@ const UserMenu: React.FC<userMenuProps> = ({name }) => {
           overflowY: 'auto',  // Allow scrolling if content exceeds max height
         }}>
           <h3>Welcome {name}</h3>
-        <Dropdown.Item href="#/dashboard">Dashboard</Dropdown.Item>
+        <Dropdown.Item onClick={handleDashboard}>Dashboard</Dropdown.Item>
         <Dropdown.Item href="#/logout">Log Out</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>

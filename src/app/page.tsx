@@ -27,8 +27,8 @@ interface User {
 
 const HomePage = () => {
   const [email, setEmail] = useState<string>(); 
-  const [role, setRole] = useState<string>();
-  const [name, setName] = useState<string>();
+  const [role, setRole] = useState<string>("");
+  const [name, setName] = useState<string>("");
   const[id,setId]= useState<string>();
   const[enrolledCourses,SetEnrolledCourses]= useState<Types.ObjectId[]>();
   const[createdCourses,SetCreatedCourses]= useState<Types.ObjectId[]>();
@@ -57,11 +57,10 @@ const HomePage = () => {
         if (response.status === 200) {
           const new_user = response.data;
           setUser(new_user);
-          setGuest(false);
         }
       } catch (error: any) {
         if (error.response && error.response.status === 401) {
-          setGuest(true);
+          setRole("guest")
           return;
         }
         console.error('Error fetching user data:', error.response?.data || error.message);
@@ -113,7 +112,7 @@ const HomePage = () => {
     `}</style>
 
 <div className="container">
-  <NavBar isGuest={guest}  name={name} />
+  <NavBar role={role}  name={name} />
   <h1 className="title" style={{ color: 'white' }}>Welcome to Alpine Academy</h1>
   <p className="content" style={{ color: 'white' }}>
     Climb the Peaks of Knowledge with Us!
@@ -127,6 +126,7 @@ const HomePage = () => {
     Start your ascent today and reach new peaks in your learning journey!
   </p>
   <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+    <div>
         <button
           className="btn btn-outline-primary rounded-pill"
           style={{
@@ -139,6 +139,8 @@ const HomePage = () => {
           Browse our course selection
           
         </button>
+        </div>
+        <div>
         <button
           className="btn btn-outline-primary rounded-pill"
           style={{
@@ -151,6 +153,7 @@ const HomePage = () => {
           Browse our Instructors selection
           
         </button>
+        </div>
       </div>
       
 </div>
