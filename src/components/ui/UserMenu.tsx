@@ -1,16 +1,24 @@
 'use client'
-import React from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FaUserCircle } from 'react-icons/fa'; // Import an icon (e.g., user icon)
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from 'next/navigation'
+import React from 'react';
+ // Import an icon (e.g., user icon)
 import axios from 'axios';
+
 interface userMenuProps{
     name:string
     role:string
 }
 
-const UserMenu: React.FC<userMenuProps> = ({ name , role }) => {
+const UserMenu: React.FC<userMenuProps> = ({name , role }) => {
+  const router = useRouter();
+
+  function handleDashboard() {
+    router.push(`/dashboard?role=${role}`);
+  }
+
   const handleLogout = async () => {
     try {
       await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
@@ -20,11 +28,7 @@ const UserMenu: React.FC<userMenuProps> = ({ name , role }) => {
     }
   };
 
-  const router = useRouter();
 
-  function handleDashboard() {
-    router.push(`/dashboard?role=${role}`);
-  }
   return (
     <Dropdown>
       <Dropdown.Toggle
@@ -43,12 +47,14 @@ const UserMenu: React.FC<userMenuProps> = ({ name , role }) => {
       </Dropdown.Toggle>
 
       <Dropdown.Menu className="dropdown-menu dropdown-menu-lg" style={{
-        minWidth: '400px',  // Set the minimum width of the dropdown
-        fontSize: '18px',   // Increase font size
-        padding: '15px',    // Add padding to the dropdown items
-        maxHeight: '400px', // Optional: Set a maximum height for the menu
-        overflowY: 'auto',  // Allow scrolling if content exceeds max height
-      }}>
+          minWidth: '400px',  // Set the minimum width of the dropdown
+          fontSize: '18px',   // Increase font size
+          padding: '15px',    // Add padding to the dropdown items
+          maxHeight: '400px', // Optional: Set a maximum height for the menu
+          overflowY: 'auto',  // Allow scrolling if content exceeds max height
+        }}>
+       
+
         <h3>Welcome {name}</h3>
         <Dropdown.Item onClick={handleDashboard}>Dashboard</Dropdown.Item>
         <Dropdown.Item onClick={handleLogout}>Log Out</Dropdown.Item>

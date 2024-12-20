@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Instructor } from "../types/Course";
 
-const InstructorDetailsPage = ({ Instructor, isGuest }: { Instructor: Instructor; isGuest: boolean }) => {
+const InstructorDetailsPage = ({ Instructor}: { Instructor: Instructor }) => {
   // State for the Instructor details
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state

@@ -34,6 +34,7 @@ const Dashboard = () => {
   const [userData, setUserData] = useState<User | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
+  const [searchStudents, setSearchStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -75,8 +76,9 @@ const Dashboard = () => {
 
     const fetchStudents = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/students", { withCredentials: true });
+        const response = await axios.get("http://localhost:3000/users/students", { withCredentials: true });
         setStudents(response.data);
+        setSearchStudents(response.data)
       } catch (err) {
         console.error('Failed to fetch students', err);
       }
@@ -91,14 +93,21 @@ const Dashboard = () => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = courses.filter(
-      (course) =>
-        course.title.toLowerCase().includes(query) ||
-        course.description.toLowerCase().includes(query) ||
-        course.keywords.some((keyword) => keyword.toLowerCase().includes(query))
-    );
-
-    setSearchCourses(filtered);
+    if (activeTab === 'courses') {
+      const filteredCourses = courses.filter(
+        (course) =>
+          course.title.toLowerCase().includes(query) ||
+          course.description.toLowerCase().includes(query) ||
+          course.keywords.some((keyword) => keyword.toLowerCase().includes(query))
+      );
+      setSearchCourses(filteredCourses);
+    } else if (activeTab === 'students') {
+      const filteredStudents = students.filter(
+        (student) =>
+          student.name.toLowerCase().includes(query)
+      );
+      setSearchStudents(filteredStudents);
+    }
   };
 
   return (
@@ -389,8 +398,16 @@ const Dashboard = () => {
             </>
           )}
           {activeTab === 'students' && (
+            <>
+          <input
+          type="text"
+          className="search-input"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search students..."
+          />
             <div className="student-container">
-              {students.map((student) => (
+              {searchStudents.map((student) => (
                 <div key={student._id} className="student-card">
                   <div className="student-name">{student.name}</div>
                   <div className="student-email">{student.email}</div>
@@ -398,7 +415,9 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
+            </>
           )}
+          
           {activeTab === 'chat' && <div>Chat content goes here</div>}
         </div>
       )}

@@ -1,17 +1,17 @@
 'use client'
-import { useSearchParams } from 'next/navigation'; // Import useSearchParams from next/navigation
+import { useSearchParams } from 'next/navigation'; 
 import InstructorDashboard from './InstructorDashboard';
 import AdminDashboard from './AdminDashboard';
 //import StudentDashboard from './StudentDashboard';
 const Dashboard = () => {
   const searchParams = useSearchParams();
-  const role = searchParams.get('role'); // Access query parameter 'role'
+  const role = searchParams.get('role'); 
 
   if (!role) {
-    return <div>Loading...</div>; // Or show a loading spinner if role is not present
+    return <div>Loading...</div>; 
   }
 
-  // Conditional rendering based on role
+
   if (role === 'instructor') {
     return <InstructorDashboard />;
   } else if (role === 'student') {
