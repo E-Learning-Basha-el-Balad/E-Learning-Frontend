@@ -73,18 +73,18 @@ const Dashboard = () => {
       }
     };
 
-    const fetchStudents = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/students", { withCredentials: true });
-        setStudents(response.data);
-      } catch (err) {
-        console.error('Failed to fetch students', err);
-      }
-    };
+    // const fetchStudents = async () => {
+    //   try {
+    //     const response = await axios.get("http://localhost:3000/students", { withCredentials: true });
+    //     setStudents(response.data);
+    //   } catch (err) {
+    //     console.error('Failed to fetch students', err);
+    //   }
+    // };
 
     fetchData();
     fetchCourses();
-    fetchStudents();
+   // fetchStudents();
   }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
