@@ -33,6 +33,15 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
         setMessage("Already Enrolled");
         setRed(true);
       }
+
+      if (error.response && error.response.status === 403) {
+        setMessage("This User cant enroll in courses");
+        setRed(true);
+      }
+      if (error.response && error.response.status === 401) {
+        setMessage("Please Login or signup to enroll in courses");
+        setRed(true);
+      }
     }
   };
 
@@ -81,7 +90,7 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
 
             {/* Centered and Styled Enroll Button */}
             <div className="d-flex justify-content-center mt-4 w-100">
-              {(
+              {/* {(
                 <a href="/login">
                   <button
                     className="btn btn-pink rounded-pill"
@@ -97,7 +106,7 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
                     Login or Create an Account to enroll
                   </button>
                 </a>
-              )}
+              )} */}
               { (
                 <button
                   className="btn btn-pink rounded-pill"
