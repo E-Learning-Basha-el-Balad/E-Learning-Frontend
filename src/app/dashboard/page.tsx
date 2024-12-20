@@ -6,7 +6,7 @@ const Dashboard = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get('role'); 
 
-  if (role) {
+  if (!role) {
     return <div>Loading...</div>; 
   }
 
