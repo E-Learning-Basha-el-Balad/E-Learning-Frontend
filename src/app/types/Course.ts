@@ -5,20 +5,20 @@ export enum DifficultyLevel {
 }
 
 export interface Course {
-  _id: string; // MongoDB ObjectId as a string
+  _id: string; 
   title: string;
   description: string;
   category: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   created_by: string;
   versionNumber: number;
-  userId: string; // Instructor's ObjectId as a string
-  students: string[]; // Array of student ObjectIds as strings
-  isAvailable: boolean; // Availability of the course
-  keywords: string[]; // Array of keywords for the course
-  instructor_details: Instructor[]; // Array of instructor details
-  created_at?: string; // Optional timestamp from backend schema
-  updated_at?: string; // Optional timestamp from backend schema
+  userId: string; 
+  students: string[]; 
+  isAvailable: boolean; 
+  keywords: string[]; 
+  instructor_details: Instructor[]; 
+  created_at?: string; 
+  updated_at?: string; 
   DifficultyLevel: DifficultyLevel; // Enum value for the difficulty level
 }
 

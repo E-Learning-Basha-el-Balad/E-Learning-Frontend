@@ -60,16 +60,14 @@ const AllInstructorsPage = ({ isGuest }: { isGuest: boolean }) => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 font-sans">
         {selectedInstructor ? (
           <div>
-            <button
+            <button  
               onClick={() => setSelectedInstructor(null)}
               className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4 space-x-2 transition-colors duration-300"
             >
               <FaBookOpen className="mr-2" />
               <span>Back to All Instructors</span>
             </button>
-            <InstructorDetailsPage Instructor={selectedInstructor} isGuest={false}></InstructorDetailsPage>
-            
-            {/* Render selected instructor details */}
+            <InstructorDetailsPage Instructor={selectedInstructor}></InstructorDetailsPage>
           
             </div>
     

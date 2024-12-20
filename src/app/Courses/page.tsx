@@ -111,7 +111,7 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
                <FaArrowLeft className="mr-2" />
                <span>Back to All Courses</span>
             </button>
-            <CourseDetailsPage course={selectedCourse} guest={guest} />
+            <CourseDetailsPage course={selectedCourse}/>
           </div>
         ) : (
           <div className="max-w-7xl mx-auto">
