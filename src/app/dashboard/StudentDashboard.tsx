@@ -4,6 +4,7 @@ import axios from "axios";
 import { Types } from 'mongoose';
 import { Course } from "../types/Course";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
+import StudentDetailsPage from "./StudentCourseDetails";
 
 interface User {
   _id: string;
@@ -22,10 +23,12 @@ interface User {
 
 
 const StudentDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'performance' | 'updateDetails' | 'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forms' | 'chat' | 'myCourses'>('performance');
+  const [activeTab, setActiveTab] = useState<'performance' | 'updateDetails' | 'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forms' | 'chat' | 'myCourses'| 'courseDetails'>('performance');
   const [userData, setUserData] = useState<User | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   
 
@@ -36,6 +39,7 @@ const StudentDashboard = () => {
   const setUser = (newUser: User) => {
     setUserData(newUser);
   };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +76,14 @@ const StudentDashboard = () => {
     }
   }, [userData]); 
   
-
+  const handleCourseClick = (course: Course) => {
+    setSelectedCourse(course);
+    setActiveTab('courseDetails');
+  };
+  const handleBackButtonClick = () => {
+    setSelectedCourse(null);
+    setActiveTab('myCourses');
+  };
   const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.trim();
     setSearchQuery(query);
@@ -395,33 +406,43 @@ const StudentDashboard = () => {
               {/* Chat functionality */}
             </div>
           )}
-          {activeTab === 'myCourses' && (
-  <div>
-    <h1>My Courses</h1>
-
-    {/* Check if there are any enrolled courses */}
-    {courses.length > 0 ? (
-      <div className="course-container">
-        {courses.map(course => (
-          <div className="course-card" key={course._id}>
-            <div className="course-title">{course.title}</div>
-            <div className="course-description">{course.description}</div>
-            <div className="course-keywords">
-              {course.keywords.join(', ')}
+            {activeTab === 'courseDetails' && selectedCourse && (
+            <div className="course-details">
+              <div className="back-button-container">
+                <button onClick={handleBackButtonClick}>
+                  <FaArrowLeft />
+                  Back to My Courses
+                </button>
+              </div>
+              <StudentDetailsPage course={selectedCourse} /> {/* Pass the selected course to the StudentDetailsPage */}
             </div>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p>You are not enrolled in any courses yet.</p>
-    )}
-  </div>
-)}
-
+          )}
+          {activeTab === 'myCourses' && (
+            <div>
+              <h1>My Courses</h1>
+              {courses.length > 0 ? (
+                <div className="course-container">
+                  {courses.map(course => (
+                    <div
+                      className="course-card"
+                      key={course._id}
+                      onClick={() => handleCourseClick(course)} 
+                    >
+                      <div className="course-title">{course.title}</div>
+                      <div className="course-description">{course.description}</div>
+                      <div className="course-keywords">{course.keywords.join(', ')}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>You are not enrolled in any courses yet.</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>
   );
-};
+}
 
 export default StudentDashboard;
