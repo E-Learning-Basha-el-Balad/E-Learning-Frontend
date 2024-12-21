@@ -2,7 +2,7 @@
 import { useSearchParams } from 'next/navigation'; 
 import InstructorDashboard from './InstructorDashboard';
 import AdminDashboard from './AdminDashboard';
-//import StudentDashboard from './StudentDashboard';
+import StudentDashboard from './StudentDashboard';
 const Dashboard = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get('role'); 
@@ -15,7 +15,7 @@ const Dashboard = () => {
   if (role === 'instructor') {
     return <InstructorDashboard />;
   } else if (role === 'student') {
-    //return <StudentDashboard/>;
+    return <StudentDashboard/>;
   } else if (role === 'admin') {
     return <AdminDashboard/>;
   }
