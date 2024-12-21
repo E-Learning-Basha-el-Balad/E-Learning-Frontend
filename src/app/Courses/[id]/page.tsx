@@ -5,15 +5,19 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Course } from "../../types/Course";
 import CourseDetailsPage from "../Details/page";
+// Remove incorrect import
 
 export default function CourseById() { // useRouter() gives access to URL params
   const { id } = useParams(); // Extract 'id' from router.query
-
+  const router = useRouter(); // Get router instance
   const [course, setCourse] = useState<Course | null>(null); // Initialize as null for better handling
   const [loading, setLoading] = useState<boolean>(true); // Handle loading state
   const [error, setError] = useState<string | null>(null); // Handle error state
 
   useEffect(() => {
+    if(id=='Create' || id=='create'){
+      router.push('/Create'); 
+    }
     // Check if id exists in query
     if (id) {
       const fetchCourse = async () => {
