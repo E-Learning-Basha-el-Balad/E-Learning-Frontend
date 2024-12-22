@@ -1,0 +1,265 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function QuestionsPage() {
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
+  const [formData, setFormData] = useState({
+    type: 'MCQ',
+    options: ['', '', '', ''],
+    correct_answer: '',
+    question_text: '',
+    difficulty: 'B',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  // Fetch questions when the page loads
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/question-bank`, {
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Failed to fetch questions');
+        const data = await response.json();
+        setQuestions(data);
+      } catch (err) {
+        setError('Failed to load questions');
+      }
+    };
+    fetchQuestions();
+  }, []);
+
+  // Handle delete operation
+  const handleDelete = async (questionId: string) => {
+    if (!window.confirm('Are you sure you want to delete this question?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/question-bank/${questionId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to delete question');
+      setQuestions((prevQuestions) => prevQuestions.filter((q) => q._id !== questionId));
+      alert('Question deleted successfully');
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete question. Please try again.');
+    }
+  };
+
+  // Handle edit button click
+  const handleEdit = (question: any) => {
+    setEditingQuestion(question);
+    setFormData({
+      ...question,
+      options: question.options || ['', '', '', ''], // Ensure options array is always present
+    });
+  };
+
+  // Handle form data change for editing
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index?: number) => {
+    const { name, value } = e.target;
+    if (name === 'options' && index !== undefined) {
+      const updatedOptions = [...formData.options];
+      updatedOptions[index] = value;
+      setFormData({ ...formData, options: updatedOptions });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  // Handle update form submission
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`http://localhost:3000/question-bank/${editingQuestion._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Failed to update question');
+      const updatedQuestion = await response.json();
+
+      // Update questions list without reloading the page
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((question) =>
+          question._id === updatedQuestion._id ? updatedQuestion : question
+        )
+      );
+
+      alert('Question updated successfully');
+      setEditingQuestion(null); // Close the edit form
+    } catch (err) {
+      console.error('Update error:', err);
+      setError('Failed to update question. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="container py-4">
+      <h1 className="text-center mb-4">Question Bank</h1>
+
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          <h4 className="alert-heading">Error</h4>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {editingQuestion ? (
+        <div className="card mb-4 p-4">
+          <h5 className="card-title">Edit Question</h5>
+          <form onSubmit={handleUpdate}>
+            <div className="mb-3">
+              <label className="form-label">Question Text:</label>
+              <input
+                type="text"
+                name="question_text"
+                value={formData.question_text}
+                onChange={handleFormChange}
+                className="form-control"
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Type:</label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleFormChange}
+                className="form-select"
+                required
+              >
+                <option value="MCQ">MCQ</option>
+                <option value="True/False">True/False</option>
+              </select>
+            </div>
+
+            {formData.type === 'MCQ' && (
+              <div className="mb-3">
+                <label className="form-label">Options:</label>
+                {formData.options.map((option, index) => (
+                  <div key={index} className="mb-2">
+                    <input
+                      type="text"
+                      name="options"
+                      value={option}
+                      onChange={(e) => handleFormChange(e, index)}
+                      className="form-control"
+                      placeholder={`Option ${index + 1}`}
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mb-3">
+              <label className="form-label">Correct Answer:</label>
+              <input
+                type="text"
+                name="correct_answer"
+                value={formData.correct_answer}
+                onChange={handleFormChange}
+                className="form-control"
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Difficulty:</label>
+              <select
+                name="difficulty"
+                value={formData.difficulty}
+                onChange={handleFormChange}
+                className="form-select"
+                required
+              >
+                <option value="A">Hard</option>
+                <option value="B">Normal</option>
+                <option value="C">Easy</option>
+              </select>
+            </div>
+
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? 'Updating...' : 'Update Question'}
+            </button>
+          </form>
+        </div>
+      ) : (
+        <div className="row">
+          {questions.map((question: any) => (
+            <div key={question._id} className="col-md-6 mb-4">
+              <div className="card h-100 shadow-sm">
+                <div className="card-body position-relative">
+                  <button
+                    className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                    onClick={() => handleDelete(question._id)}
+                    title="Delete this question"
+                  >
+                    <i className="bi bi-trash"></i>
+                  </button>
+                  <button
+                    className="btn btn-primary btn-sm position-absolute bottom-0 end-0 m-2"
+                    onClick={() => handleEdit(question)}
+                    title="Edit this question"
+                  >
+                    <i className="bi bi-pencil"></i>
+                  </button>
+
+                  <h5 className="card-title">{question.question_text}</h5>
+                  <div className="card-text">
+                    <p className="mb-2">
+                      <span className="badge bg-primary me-2">Type: {question.type}</span>
+                      <span
+                        className={`badge ${
+                          question.difficulty === 'A'
+                            ? 'bg-danger'
+                            : question.difficulty === 'B'
+                            ? 'bg-warning'
+                            : 'bg-success'
+                        }`}
+                      >
+                        Difficulty:{' '}
+                        {question.difficulty === 'A'
+                          ? 'Hard'
+                          : question.difficulty === 'B'
+                          ? 'Medium'
+                          : 'Easy'}
+                      </span>
+                    </p>
+                    <div className="mt-3">
+                      <p className="fw-bold mb-2">Options:</p>
+                      <ul className="list-group mb-4">
+                        {question.options.map((option: string, index: number) => (
+                          <li key={index} className="list-group-item">
+                            {option}
+                            {option === question.correct_answer && (
+                              <span className="badge bg-success float-end">✓ Correct</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}
