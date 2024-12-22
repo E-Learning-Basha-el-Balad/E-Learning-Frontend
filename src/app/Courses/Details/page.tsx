@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
-import { Course,Instructor } from "../../types/Course";
+import { useState, useEffect } from "react";
+import { Course } from "../../types/Course";
+import { Module } from "@/app/types/Module";
 import axios from "axios";
+import Accordion from "@/components/ui/Accordion";
 
 const CourseDetailsPage = ({ course }: { course: Course | null }) => {
   // State for the course details
@@ -9,17 +11,47 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [red, setRed] = useState<boolean | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+
+  // Fetch modules when the component mounts
+  useEffect(() => {
+    const fetchModules = async () => {
+      if (!course?._id) return;
+
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `http://localhost:3000/courses/${course._id}/modules`,
+          { withCredentials: true }
+        );
+        setModules(response.data);
+      } catch (err: any) {
+        console.error(err.response?.data || err.message);
+        setError("Failed to fetch modules.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModules();
+  }, [course?._id]);
 
   const Enroll = async () => {
+
+   
+    
     try {
+      console.error("ENTERED")
+      console.error(course?._id);
       const response = await axios.post(
         "http://localhost:3000/courses/enroll",
-        {
-          courseId: course?._id,
-        },
+        {courseId: course?._id,},
         { withCredentials: true }
       );
+      console.error(course?._id);
 
+
+      console.error("ENTERED2")
       if (response.status == 201) {
         setMessage("Enrolled Successfully");
         setRed(false);
@@ -35,13 +67,17 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
       }
 
       if (error.response && error.response.status === 403) {
-        setMessage("This User cant enroll in courses");
+        setMessage("This User can't enroll in courses");
         setRed(true);
       }
       if (error.response && error.response.status === 401) {
-        setMessage("Please Login or signup to enroll in courses");
+        setMessage("Please login or sign up to enroll in courses");
         setRed(true);
       }
+
+      
+     
+      
     }
   };
 
@@ -50,7 +86,6 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
       <div className="card shadow-lg p-4 w-100 w-md-75 w-lg-50">
         <h1 className="card-title text-center text-black mb-4">{course?.title}</h1>
 
-        {/* Center the inner card */}
         {course && (
           <div
             className="card-body d-flex flex-column align-items-center"
@@ -71,7 +106,9 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Instructor:</div>
-              <div className="col-md-8">{course.instructor_details[0].name || "Unassigned"}</div>
+              <div className="col-md-8">
+                {course.instructor_details[0]?.name || "Unassigned"}
+              </div>
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Version:</div>
@@ -87,42 +124,30 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
                 </ul>
               </div>
             </div>
+            
+                  <h1 style={{fontFamily: "CustomFont"}}>Modules</h1>
+                  <br></br>
+            {/* Modules Section */}
+            <div className="row w-100">
+              <Accordion modules={modules} isGuest={false} isInstructor={false}/>
+            </div>
 
             {/* Centered and Styled Enroll Button */}
             <div className="d-flex justify-content-center mt-4 w-100">
-              {/* {(
-                <a href="/login">
-                  <button
-                    className="btn btn-pink rounded-pill"
-                    type="button"
-                    style={{
-                      backgroundColor: "#ec4899", // Pink color
-                      color: "#fff", // White text
-                      border: "none", // Remove border
-                      padding: "10px 30px", // Add some padding
-                      fontFamily: "CustomFont2", // Custom font
-                    }}
-                  >
-                    Login or Create an Account to enroll
-                  </button>
-                </a>
-              )} */}
-              { (
-                <button
-                  className="btn btn-pink rounded-pill"
-                  type="button"
-                  onClick={Enroll}
-                  style={{
-                    backgroundColor: "#ec4899", // Pink color
-                    color: "#fff", // White text
-                    border: "none", // Remove border
-                    padding: "10px 30px", // Add some padding
-                    fontFamily: "CustomFont2", // Custom font
-                  }}
-                >
-                  Enroll
-                </button>
-              )}
+              <button
+                className="btn btn-pink rounded-pill"
+                type="button"
+                onClick={Enroll}
+                style={{
+                  backgroundColor: "#ec4899", // Pink color
+                  color: "#fff", // White text
+                  border: "none", // Remove border
+                  padding: "10px 30px", // Add some padding
+                  fontFamily: "CustomFont2", // Custom font
+                }}
+              >
+                Enroll
+              </button>
             </div>
 
             {/* Message Box */}
