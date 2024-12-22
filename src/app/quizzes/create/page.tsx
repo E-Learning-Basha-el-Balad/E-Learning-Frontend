@@ -1,18 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function CreateQuizPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const moduleId = searchParams.get('moduleId');
+
   const [formData, setFormData] = useState({
-    module_id: '',
+    module_id: moduleId || '',
     typeOfQuestions: [] as string[],
     numOfQuestions: 0,
     questions: [] as string[],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+
+  // Update formData when moduleId changes
+  useEffect(() => {
+    if (moduleId) {
+      setFormData(prev => ({
+        ...prev,
+        module_id: moduleId
+      }));
+    }
+  }, [moduleId]);
 
   // Handle form input changes
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -71,7 +84,7 @@ export default function CreateQuizPage() {
       }
 
       alert('Quiz created successfully!');
-      router.push('/quizzes'); // Redirect to the quizzes list page
+      router.push(`/quizzes?moduleId=${moduleId}`);
     } catch (err: any) {
       setError(err.message || 'Failed to create quiz');
     } finally {
@@ -103,7 +116,7 @@ export default function CreateQuizPage() {
               )}
 
               <form onSubmit={handleSubmit} className="needs-validation">
-                {/* Module ID Input */}
+                {/* Module ID Input - now readonly when provided via URL */}
                 <div className="mb-4">
                   <label className="form-label fw-bold">
                     <i className="bi bi-folder me-2"></i>
@@ -121,6 +134,7 @@ export default function CreateQuizPage() {
                       className="form-control form-control-lg"
                       placeholder="Enter module ID"
                       required
+                      readOnly={!!moduleId} // Make readonly if moduleId is provided
                     />
                   </div>
                 </div>
@@ -194,10 +208,10 @@ export default function CreateQuizPage() {
                   <button 
                     type="button" 
                     className="btn btn-outline-secondary btn-lg"
-                    onClick={() => router.push('/quizzes')}
+                    onClick={() => router.push(`/questions?moduleId=${moduleId}`)}
                   >
                     <i className="bi bi-arrow-left me-2"></i>
-                    Back to Quizzes
+                    Back to Questions
                   </button>
                 </div>
               </form>

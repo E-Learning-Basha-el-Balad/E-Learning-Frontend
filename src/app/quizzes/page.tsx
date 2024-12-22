@@ -1,10 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 export default function QuizzesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const moduleId = searchParams.get('moduleId');
+  
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [moduleTitle, setModuleTitle] = useState<string>('');
   const [editingQuiz, setEditingQuiz] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     module_id: '',
@@ -15,23 +21,52 @@ export default function QuizzesPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch module title
+  useEffect(() => {
+    const fetchModuleTitle = async () => {
+      if (!moduleId) return;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/courses/any/modules/${moduleId}`, {
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch module details');
+        const moduleData = await response.json();
+        setModuleTitle(moduleData.title);
+      } catch (err) {
+        console.error('Error fetching module title:', err);
+        setModuleTitle('Unknown Module');
+      }
+    };
+
+    fetchModuleTitle();
+  }, [moduleId]);
+
   // Fetch quizzes when the page loads
   useEffect(() => {
     const fetchQuizzes = async () => {
+      if (!moduleId) {
+        setQuizzes([]);
+        return;
+      }
+
       try {
-        const response = await fetch(`http://localhost:3000/quizzes`, {
+        const response = await fetch(`http://localhost:3000/quizzes/m/module/${moduleId}`, {
           cache: 'no-store',
           headers: { 'Content-Type': 'application/json' },
         });
         if (!response.ok) throw new Error('Failed to fetch quizzes');
         const data = await response.json();
-        setQuizzes(data);
+        // If data is a single quiz, convert to array, otherwise use as is
+        setQuizzes(Array.isArray(data) ? data : [data]);
       } catch (err) {
         setError('Failed to load quizzes');
       }
     };
     fetchQuizzes();
-  }, []);
+  }, [moduleId]);
 
   // Modified handleFormChange to handle select dropdown
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -139,7 +174,18 @@ export default function QuizzesPage() {
 
   return (
     <main className="container py-4">
-      <h1 className="text-center mb-4">Quizzes</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex align-items-center gap-3">
+          <button 
+            className="btn btn-outline-secondary"
+            onClick={() => router.back()}
+          >
+            <i className="bi bi-arrow-left me-2"></i>
+            Back to Course
+          </button>
+          <h1>Quizzes for Module: {moduleTitle || 'Loading...'}</h1>
+        </div>
+      </div>
 
       {error && (
         <div className="alert alert-danger" role="alert">
@@ -218,36 +264,69 @@ export default function QuizzesPage() {
       ) : (
         <div className="row">
           {quizzes.map((quiz: any) => (
-            <div key={quiz._id} className="col-md-6 mb-4">
+            <div key={quiz._id} className="col-lg-8 mb-4 mx-auto">
               <div className="card h-100 shadow-sm">
-                <div className="card-body position-relative">
+                <div className="card-body position-relative p-4">
                   <button
-                    className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                    className="btn btn-danger btn-sm position-absolute top-0 end-0 m-3"
                     onClick={() => handleDelete(quiz._id)}
                     title="Delete this quiz"
                   >
-                    <i className="bi bi-trash"></i>
+                    <FaTrash />
                   </button>
                   <button
-                    className="btn btn-primary btn-sm position-absolute bottom-0 end-0 m-2"
+                    className="btn btn-primary btn-sm position-absolute bottom-0 end-0 m-3"
                     onClick={() => handleEdit(quiz)}
                     title="Edit this quiz"
                   >
-                    <i className="bi bi-pencil"></i>
+                    <FaEdit />
                   </button>
 
-                  <h5 className="card-title">
-                    Quiz for Module: {quiz.module_id}
-                  </h5>
                   <div className="card-text">
-                    <p className="mb-2">
-                      <span className="badge bg-primary me-2">
+                    <div className="mb-4">
+                      <span className="badge bg-primary me-2 fs-6">
                         Questions: {quiz.numOfQuestions}
                       </span>
-                      <span className="badge bg-success">
+                      <span className="badge bg-success fs-6">
                         Types: {quiz.typeOfQuestions.join(', ')}
                       </span>
-                    </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <h5 className="mb-3">Questions:</h5>
+                      <div className="list-group">
+                        {quiz.questionsA && quiz.questionsA.length > 0 && (
+                          <div className="mb-4">
+                            <span className="badge bg-danger mb-2 fs-6">Hard</span>
+                            {quiz.questionsA.map((q: any, index: number) => (
+                              <div key={index} className="list-group-item py-3">
+                                {q.question_text}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {quiz.questionsB && quiz.questionsB.length > 0 && (
+                          <div className="mb-4">
+                            <span className="badge bg-warning mb-2 fs-6">Medium</span>
+                            {quiz.questionsB.map((q: any, index: number) => (
+                              <div key={index} className="list-group-item py-3">
+                                {q.question_text}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {quiz.questionsC && quiz.questionsC.length > 0 && (
+                          <div className="mb-4">
+                            <span className="badge bg-success mb-2 fs-6">Easy</span>
+                            {quiz.questionsC.map((q: any, index: number) => (
+                              <div key={index} className="list-group-item py-3">
+                                {q.question_text}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

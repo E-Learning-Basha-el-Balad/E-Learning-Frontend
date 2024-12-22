@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const CreateQuestionPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const moduleId = searchParams.get('moduleId');
+
   const initialFormState = {
     type: 'MCQ',
     options: ['', '', '', ''],
     correct_answer: '',
-    module_id: '',
+    module_id: moduleId || '',
     difficulty: 'B',
     question_text: '',
   };
@@ -17,6 +20,15 @@ const CreateQuestionPage = () => {
   const [formData, setFormData] = useState(initialFormState);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (moduleId) {
+      setFormData(prev => ({
+        ...prev,
+        module_id: moduleId
+      }));
+    }
+  }, [moduleId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -56,10 +68,9 @@ const CreateQuestionPage = () => {
       })
       .then(() => {
         setSuccess('Question created successfully!');
-        resetForm(); // Clear the form
-        // Optional: Redirect after a delay
+        resetForm();
         setTimeout(() => {
-          router.push('/questions');
+          router.push(`/questions?moduleId=${formData.module_id}`);
         }, 2000);
       })
       .catch((error: Error) => {
@@ -189,6 +200,7 @@ const CreateQuestionPage = () => {
                     className="form-control form-control-lg"
                     placeholder="Enter module ID"
                     required
+                    readOnly={!!moduleId}
                   />
                 </div>
 

@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<any[]>([]);
+  const [moduleTitle, setModuleTitle] = useState<string>('');
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     type: 'MCQ',
@@ -16,15 +18,46 @@ export default function QuestionsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const moduleId = searchParams.get('moduleId');
+
+  // Add new useEffect to fetch module details
+  useEffect(() => {
+    const fetchModuleTitle = async () => {
+      if (!moduleId) return;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/courses/any/modules/${moduleId}`, {
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch module details');
+        const moduleData = await response.json();
+        setModuleTitle(moduleData.title);
+      } catch (err) {
+        console.error('Error fetching module title:', err);
+        setModuleTitle('Unknown Module');
+      }
+    };
+
+    fetchModuleTitle();
+  }, [moduleId]);
 
   // Fetch questions when the page loads
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/question-bank`, {
+        if (!moduleId) {
+          setQuestions([]);
+          return;
+        }
+
+        const response = await fetch(`http://localhost:3000/question-bank/m/module/${moduleId}`, {
           cache: 'no-store',
           headers: { 'Content-Type': 'application/json' },
         });
+        
         if (!response.ok) throw new Error('Failed to fetch questions');
         const data = await response.json();
         setQuestions(data);
@@ -33,7 +66,7 @@ export default function QuestionsPage() {
       }
     };
     fetchQuestions();
-  }, []);
+  }, [moduleId]);
 
   // Handle delete operation
   const handleDelete = async (questionId: string) => {
@@ -55,17 +88,34 @@ export default function QuestionsPage() {
 
   // Handle edit button click
   const handleEdit = (question: any) => {
+    const options = question.type === 'MCQ'
+      ? [...(question.options || []), '', '', '', ''].slice(0, 4)  // Ensure 4 options for MCQ
+      : ['True', 'False'];  // Always 2 options for True/False
+
     setEditingQuestion(question);
     setFormData({
       ...question,
-      options: question.options || ['', '', '', ''], // Ensure options array is always present
+      options: options,
     });
   };
 
   // Handle form data change for editing
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index?: number) => {
     const { name, value } = e.target;
-    if (name === 'options' && index !== undefined) {
+    
+    if (name === 'type') {
+      // Reset options based on question type
+      const newOptions = value === 'MCQ' 
+        ? ['', '', '', '']  // 4 options for MCQ
+        : ['True', 'False']; // 2 options for True/False
+      
+      setFormData({
+        ...formData,
+        type: value,
+        options: newOptions,
+        correct_answer: '', // Reset correct answer when changing type
+      });
+    } else if (name === 'options' && index !== undefined) {
       const updatedOptions = [...formData.options];
       updatedOptions[index] = value;
       setFormData({ ...formData, options: updatedOptions });
@@ -108,7 +158,57 @@ export default function QuestionsPage() {
 
   return (
     <main className="container py-4">
-      <h1 className="text-center mb-4">Question Bank</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex align-items-center gap-3">
+          <button 
+            className="btn btn-outline-secondary"
+            onClick={() => router.back()}
+          >
+            <i className="bi bi-arrow-left me-2"></i>
+            Back to Course
+          </button>
+          <h1>Questions for Module: {moduleTitle || 'Loading...'}</h1>
+        </div>
+        <div className="d-flex gap-2">
+          <button 
+            className="btn btn-primary"
+            onClick={() => router.push(`/questions/create?moduleId=${moduleId}`)}
+          >
+            <i className="bi bi-plus-circle me-2"></i>
+            Create New Question
+          </button>
+          <button 
+            className="btn btn-success"
+            onClick={() => router.push(`/quizzes/create?moduleId=${moduleId}`)}
+          >
+            <i className="bi bi-file-earmark-text me-2"></i>
+            Create Quiz
+          </button>
+        </div>
+      </div>
+
+      <div className="alert alert-info mb-4" role="alert">
+        <i className="bi bi-info-circle me-2"></i>
+        <strong>Important:</strong> Please ensure an equal distribution of questions across all difficulty levels (Easy, Medium, Hard) to be able to make the quiz correctly.
+        <hr />
+        <div className="d-flex justify-content-around text-center">
+          <div>
+            <span className="badge bg-danger mb-2">Hard</span>
+            <br />
+            {questions.filter(q => q.difficulty === 'A').length} questions
+          </div>
+          <div>
+            <span className="badge bg-warning mb-2">Medium</span>
+            <br />
+            {questions.filter(q => q.difficulty === 'B').length} questions
+          </div>
+          <div>
+            <span className="badge bg-success mb-2">Easy</span>
+            <br />
+            {questions.filter(q => q.difficulty === 'C').length} questions
+          </div>
+        </div>
+      </div>
 
       {error && (
         <div className="alert alert-danger" role="alert">
@@ -200,64 +300,76 @@ export default function QuestionsPage() {
         </div>
       ) : (
         <div className="row">
-          {questions.map((question: any) => (
-            <div key={question._id} className="col-md-6 mb-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body position-relative">
-                  <button
-                    className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
-                    onClick={() => handleDelete(question._id)}
-                    title="Delete this question"
-                  >
-                    <i className="bi bi-trash"></i>
-                  </button>
-                  <button
-                    className="btn btn-primary btn-sm position-absolute bottom-0 end-0 m-2"
-                    onClick={() => handleEdit(question)}
-                    title="Edit this question"
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </button>
+          {questions.length === 0 ? (
+            <div className="col-12 text-center">
+              <p className="text-muted">No questions available for this module.</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => router.push(`/questions/create?moduleId=${moduleId}`)}
+              >
+                Create Your First Question
+              </button>
+            </div>
+          ) : (
+            questions.map((question: any) => (
+              <div key={question._id} className="col-md-6 mb-4">
+                <div className="card h-100 shadow-sm">
+                  <div className="card-body position-relative">
+                    <button
+                      className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                      onClick={() => handleDelete(question._id)}
+                      title="Delete this question"
+                    >
+                      <FaTrash />
+                    </button>
+                    <button
+                      className="btn btn-primary btn-sm position-absolute bottom-0 end-0 m-2"
+                      onClick={() => handleEdit(question)}
+                      title="Edit this question"
+                    >
+                      <FaEdit />
+                    </button>
 
-                  <h5 className="card-title">{question.question_text}</h5>
-                  <div className="card-text">
-                    <p className="mb-2">
-                      <span className="badge bg-primary me-2">Type: {question.type}</span>
-                      <span
-                        className={`badge ${
-                          question.difficulty === 'A'
-                            ? 'bg-danger'
+                    <h5 className="card-title">{question.question_text}</h5>
+                    <div className="card-text">
+                      <p className="mb-2">
+                        <span className="badge bg-primary me-2">Type: {question.type}</span>
+                        <span
+                          className={`badge ${
+                            question.difficulty === 'A'
+                              ? 'bg-danger'
+                              : question.difficulty === 'B'
+                              ? 'bg-warning'
+                              : 'bg-success'
+                          }`}
+                        >
+                          Difficulty:{' '}
+                          {question.difficulty === 'A'
+                            ? 'Hard'
                             : question.difficulty === 'B'
-                            ? 'bg-warning'
-                            : 'bg-success'
-                        }`}
-                      >
-                        Difficulty:{' '}
-                        {question.difficulty === 'A'
-                          ? 'Hard'
-                          : question.difficulty === 'B'
-                          ? 'Medium'
-                          : 'Easy'}
-                      </span>
-                    </p>
-                    <div className="mt-3">
-                      <p className="fw-bold mb-2">Options:</p>
-                      <ul className="list-group mb-4">
-                        {question.options.map((option: string, index: number) => (
-                          <li key={index} className="list-group-item">
-                            {option}
-                            {option === question.correct_answer && (
-                              <span className="badge bg-success float-end">✓ Correct</span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                            ? 'Medium'
+                            : 'Easy'}
+                        </span>
+                      </p>
+                      <div className="mt-3">
+                        <p className="fw-bold mb-2">Options:</p>
+                        <ul className="list-group mb-4">
+                          {question.options.map((option: string, index: number) => (
+                            <li key={index} className="list-group-item">
+                              {option}
+                              {option === question.correct_answer && (
+                                <span className="badge bg-success float-end">✓ Correct</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
     </main>
