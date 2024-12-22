@@ -77,7 +77,12 @@ const Accordion: React.FC<AccordionProps> = ({ modules,isGuest,isInstructor }) =
                 </div>
               )}
               <a href="" > Create Quiz</a>
+              <br/>
+              <a href="" > View Quiz</a>
+              <br/>
               <a href="" > Create Question Bank</a>
+              <br/>
+              <a href="" > View Question Banks</a>
             </div>
 
            
