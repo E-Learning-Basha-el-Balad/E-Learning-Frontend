@@ -36,9 +36,14 @@ const usePosts = (courseId: string | undefined) => {
       setPosts((prevPosts) => [newPost, ...prevPosts]);
     });
 
+    discussionsForumSocket.on('post:deleted', (deletedPost: Post) => {
+      setPosts((prevPosts) => prevPosts.filter(post => post._id !== deletedPost._id));
+    });
+
     return () => {
       discussionsForumSocket.emit('room:leave:course', { id: courseId });
       discussionsForumSocket.off('post:created');
+      discussionsForumSocket.off('post:deleted');
     };
   }, [courseId]);
 

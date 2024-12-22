@@ -32,9 +32,14 @@ const useComments = (postId: string) => {
       setComments((prevComments) => [newComment, ...prevComments]);
     });
 
+    discussionsForumSocket.on('comment:deleted', (deletedComment: Comment) => {
+      setComments((prevComments) => prevComments.filter(comment => comment._id !== deletedComment._id));
+    });
+
     return () => {
       discussionsForumSocket.emit('room:leave:post', { id: postId });
       discussionsForumSocket.off('comment:created');
+      discussionsForumSocket.off('comment:deleted');
     };
   }, [postId]);
 

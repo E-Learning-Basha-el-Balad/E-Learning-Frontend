@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import courseAnnouncementSocket from '../../socket/sockets';
 import { CourseAnnouncement } from '../../interfaces/acourse-announcement';
 
-
 const useCourseAnnouncements = (courseId: string) => {
   const [announcements, setAnnouncements] = useState<CourseAnnouncement[]>([]);
 

@@ -1,17 +1,18 @@
 "use client";
 import React from 'react';
-import useCourseAnnouncements from './hooks/useCourseAnnouncements';
-import courseAnnouncementSocket from '../socket/sockets';
+import usePlatformAnnouncements from '../hooks/usePlatformAnnouncements';
+import { platformAnnouncementSocket } from '../socket/sockets';
 
-const ViewCourseAnnouncements = ({ courseId, userRole }: { courseId: string, userRole: string }) => {
-  const announcements = useCourseAnnouncements(courseId);
+const ViewPlatformAnnouncements = ({ userRole }: { userRole: string }) => {
+  const announcements = usePlatformAnnouncements();
 
   const handleDelete = (announcementId: string) => {
-    courseAnnouncementSocket.emit('announcement:delete', announcementId);
+    platformAnnouncementSocket.emit('platform-announcement:delete', announcementId);
   };
 
   return (
     <>
+      <h1>Platform Announcements</h1>
       <ul>
         {announcements.map(announcement => (
           <li key={announcement._id}>
@@ -22,7 +23,7 @@ const ViewCourseAnnouncements = ({ courseId, userRole }: { courseId: string, use
               hour: '2-digit',
               minute: '2-digit'
             })}
-            {(userRole === 'instructor' || userRole === 'admin') && (
+            {userRole === 'admin' && (
               <button onClick={() => handleDelete(announcement._id)} className="ml-4 text-red-500">
                 Delete
               </button>
@@ -34,4 +35,4 @@ const ViewCourseAnnouncements = ({ courseId, userRole }: { courseId: string, use
   );
 };
 
-export default ViewCourseAnnouncements;
+export default ViewPlatformAnnouncements;

@@ -1,28 +1,15 @@
 "use client";
 import React from 'react';
-import usePlatformAnnouncements from '../hooks/usePlatformAnnouncements';
+import ViewPlatformAnnouncements from './ViewPlatformAnnouncements';
 
-const ViewPlatformAnnouncements = () => {
-  const announcements = usePlatformAnnouncements();
+const PlatformAnnouncementsPage = () => {
+  const userRole = 'admin';
 
   return (
-    <>
-      <h1>Platform Announcements</h1>
-      <ul>
-        {announcements.map(announcement => (
-          <li key={announcement._id}>
-            {announcement.content} - {new Date(announcement.createdAt).toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </li>
-        ))}
-      </ul>
-    </>
+    <div>
+      <ViewPlatformAnnouncements userRole={userRole} />
+    </div>
   );
 };
 
-export default ViewPlatformAnnouncements;
+export default PlatformAnnouncementsPage;
