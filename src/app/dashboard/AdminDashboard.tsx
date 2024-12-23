@@ -49,8 +49,8 @@ const AdminDashboard = () => {
   };
   useEffect(() => {
     fetchLogs();
-    fetchCourses();
-    fetchUsers();
+   
+    
   }, []);
 
   const fetchLogs = async () => {
@@ -62,23 +62,9 @@ const AdminDashboard = () => {
     } 
   };
 
-  const fetchCourses = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/courses', { withCredentials: true });
-      setCourses(response.data);
-    } catch (error: any) {
-      console.error('Error fetching courses:', error);
-    }
-  };
+ 
 
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/users', { withCredentials: true });
-      setUser(response.data);
-    } catch (error: any) {
-      console.error('Error fetching users:', error);
-    }
-  };
+  
 
   
 
