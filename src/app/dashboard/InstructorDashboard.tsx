@@ -399,7 +399,7 @@ const Dashboard = () => {
              placeholder="Search courses..."
            />
            <button
-             onClick={() => window.location.href = '/Courses/create'}
+             onClick={() => window.location.href = '/Courses/Create'}
              className="create-course-btn ml-4"
            >
              Create Course
