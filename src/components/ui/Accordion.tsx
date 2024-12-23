@@ -43,25 +43,13 @@ const Accordion: React.FC<AccordionProps> = ({ modules,isGuest,isInstructor }) =
               aria-controls={`flush-collapse-${module._id}`}
             >
               {module.title}
-
-              
-
-
-
             </button>
-            
-
-            
-
           </h2>
-           <div
+          <div
             id={`flush-collapse-${module._id}`}
             className="accordion-collapse collapse"
             data-bs-parent="#accordionFlushExample"
           >
-            
-
-            
             <div className="accordion-body">
               <p>{module.content}</p>
               {module.filePath && module.filePath.length > 0 && (
@@ -69,26 +57,21 @@ const Accordion: React.FC<AccordionProps> = ({ modules,isGuest,isInstructor }) =
                   {module.filePath.map((filePath, index) => (
                     <div key={index} className="file-item">
                       {<div> {filePath}</div>}
-                      {!isGuest&&renderFile(filePath)}
+                      {!isGuest && renderFile(filePath)}
                     </div>
                   ))}
-
-                   
                 </div>
               )}
-              <a href="" > Create Quiz</a>
-              <br/>
-              <a href="" > View Quiz</a>
-              <br/>
-              <a href="" > Create Question Bank</a>
-              <br/>
-              <a href="" > View Question Banks</a>
+              
+              <a href={`/quizzes?moduleId=${module._id}`} className="btn btn-primary me-2">
+                <i className="bi bi-file-text me-2"></i>
+                View Quiz
+              </a>
+              <a href={`/questions?moduleId=${module._id}`} className="btn btn-secondary">
+                <i className="bi bi-question-circle me-2"></i>
+                View Question Banks
+              </a>
             </div>
-
-           
-
-
-
           </div>
         </div>
       ))}

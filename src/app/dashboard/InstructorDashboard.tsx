@@ -374,7 +374,7 @@ const Dashboard = () => {
           font-size: 12px;
           color: #777;
         }
-
+        
         .search-input {
           margin-bottom: 20px;
           padding: 10px;
@@ -426,6 +426,17 @@ const Dashboard = () => {
         .student-gpa {
           font-size: 14px;
           color: #777;
+        }
+        .create-course-btn {
+          padding: 10px 16px;
+          font-size: 16px;
+          font-family: 'CustomFont2', sans-serif;
+          color: white;
+          background-color: #31087b;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background-color 0.3s ease, transform 0.2s ease;
         }
       `}</style>
       <div className="sidebar">
@@ -511,23 +522,29 @@ const Dashboard = () => {
       ) : (
         <div className="content">
           {activeTab === 'courses' && (
-            <>
-              <input
-                type="text"
-                className="search-input"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search courses..."
-              />
-              <div className="course-container">
-                {searchCourses.map((course) => (
-                  <div key={course._id} onClick={() => handleCardClick(course)} className="course-card">
-                    <div className="course-title">{course.title}</div>
-                    <div className="course-version">Version: {course.versionNumber}</div>
-                  </div>
-                ))}
-              </div>
-            </>
+           <>
+           <input
+             type="text"
+             className="search-input"
+             value={searchQuery}
+             onChange={handleSearchChange}
+             placeholder="Search courses..."
+           />
+           <button
+             onClick={() => window.location.href = '/Courses/Create'}
+             className="create-course-btn ml-4"
+           >
+             Create Course
+           </button>
+           <div className="course-container">
+             {searchCourses.map((course) => (
+               <div key={course._id} onClick={() => handleCardClick(course)} className="course-card">
+                 <div className="course-title">{course.title}</div>
+                 <div className="course-version">Version: {course.versionNumber}</div>
+               </div>
+             ))}
+           </div>
+         </>
           )}
 
 
