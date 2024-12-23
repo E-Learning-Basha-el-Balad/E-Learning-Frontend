@@ -215,7 +215,7 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
   <div className="d-flex gap-3">
     <button
       className="btn btn-primary"
-      //onClick={() => window.location.href = `/courses/${course._id}/create-module`}
+      onClick={() => window.location.href = `/Courses/${course._id}/create-module`}
     >
       Create New Module
     </button>
