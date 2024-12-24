@@ -32,7 +32,9 @@ const AllInstructorsPage = () => {
     const fetchInstructors = async () => {
       try {
         console.log("I worked btw")
-        const response = await axios.get("http://localhost:4000/users/instructors"); // Adjust URL as per API
+        const response = await axios.get("http://localhost:3000/users/instructors",{
+          withCredentials:true
+        }); // Adjust URL as per API
 
         setInstructors(response.data); // Set all instructors
         setSearchInstructors(response.data); // Initialize filtered list

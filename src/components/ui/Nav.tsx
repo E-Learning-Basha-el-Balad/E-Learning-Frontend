@@ -103,6 +103,7 @@ const NavBar: React.FC<NavBarProps> = ({ role , name }) =>  {
               <a className="nav-link active" aria-current="page" href="#" style={{ fontFamily: 'CustomFont2' }}>Home</a>
               <a className="nav-link" href="/Courses" style={{ fontFamily: 'CustomFont2' }}>Courses</a>
               <a className="nav-link" href="/Instructors" style={{ fontFamily: 'CustomFont2' }}>Instructors</a>
+              <a className="nav-link" href="/Chat" style={{ fontFamily: 'CustomFont2' }}>chats</a>
             </div>
           </div>
            <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
