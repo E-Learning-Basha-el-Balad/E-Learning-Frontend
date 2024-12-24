@@ -7,7 +7,7 @@ import { Module } from "../types/Module";
 
 const InstructorDetailsPage = ({ course }: { course: Course }) => {
   const [loading, setLoading] = useState(false);
- // const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [red, setRed] = useState<boolean | null>(null);
