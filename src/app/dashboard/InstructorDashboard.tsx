@@ -15,6 +15,7 @@ import ViewCourseAnnouncements from "../course-announcements/view/ViewCourseAnno
 import CreateCourseAnnouncementForm from "../course-announcements/create/form/CreateCourseAnnouncementForm";
 import DiscussionForum from "../discussions/main-component/DiscussionForum";
 
+import InstructorProgressReport from "../progress/instructor/page";
 const ISDP = ({ student }: { student: Student }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -576,6 +577,13 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
              ))}
            </div>
          </>
+          )}
+
+          {activeTab === 'performance' && (
+                      <div>
+                        <h1>Performance Tracking</h1>
+                        <InstructorProgressReport />;
+                      </div>
           )}
 
 

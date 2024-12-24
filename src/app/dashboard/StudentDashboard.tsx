@@ -9,6 +9,7 @@ import DiscussionForum from "../discussions/main-component/DiscussionForum";
 import CourseNotificationComponent from "../course-announcements/notification/component/NotificationComponent";
 import ReplyNotificationComponent from "../discussions/notification/NotifcationComponent";
 import ViewCourseAnnouncements from "../course-announcements/view/ViewCourseAnnouncements";
+import StudentProgressReport from "../progress/student/page";
 
 interface User {
   _id: string;
@@ -434,7 +435,7 @@ const StudentDashboard = () => {
           {activeTab === 'performance' && (
             <div>
               <h1>Performance Tracking</h1>
-              {/* Display Performance Tracking */}
+              <StudentProgressReport />;
             </div>
           )}
          {activeTab === 'updateDetails' && (
