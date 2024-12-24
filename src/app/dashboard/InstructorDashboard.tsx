@@ -7,6 +7,8 @@ import InstructorDetailsPage from "./InstructorCourseDetails";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
 import { Student } from "../types/student";
 import {Instructor} from "../types/Course"
+import { useRouter } from "next/navigation";
+
 
 import { Module } from "../types/Module";
 const ISDP = ({ student }: { student: Student }) => {
@@ -144,6 +146,8 @@ const IDP = ({ instructor }: { instructor: Instructor | null }) => {
 
 
 const Dashboard = () => {
+  const router = useRouter();
+  
   const [activeTab, setActiveTab] = useState<  'user info' | 'courses' | 'performance' | 'chat' | 'forms' | 'students'>('courses');
   const [userData, setUserData] = useState<Instructor | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -173,15 +177,24 @@ const Dashboard = () => {
       try {
         const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
         if (response.status === 200) {
+          if(response.data.role!="instructor"){
+            router.push("/unauthorized"); 
+          }
+
+
+
           setUser(response.data);
+
+
+
+  
+           
         }
-      } catch (error: unknown) {
-        if(error instanceof Error)
-          console.log(error.message);
-        // if (error.response?.status === 401) {
-        //   return;
-        // }
-        // console.error('Error fetching user data:', error.response?.data || error.message);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          router.push("/unauthorized");
+          return;
+        }
       }
     };
 
@@ -198,6 +211,7 @@ const Dashboard = () => {
     const fetchStudents = async () => {
       try {
         const response = await axios.get("http://localhost:3000/users/students", { withCredentials: true });
+        console.log(response.data)
         setStudents(response.data);
         setSearchStudents(response.data)
       } catch (err) {

@@ -72,7 +72,6 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
   const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = e.currentTarget.email.value;
-    console.error(email);
   
     try {
       const response = await axios.post(
@@ -185,7 +184,7 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
           <div className="mb-4">
             <h2 className="h5">COURSE MODULES</h2>
             {modules && modules.length > 0 ? (
-              <Accordion modules={modules} isGuest={false} isInstructor={true} />
+              <Accordion modules={modules} isGuest={false} isInstructor={true} isStudent={false} />
             ) : (
               <p style={{ fontFamily: "CustomFont2" }} className="text-muted">No modules available for this course.</p>
             )}
@@ -242,12 +241,6 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
                 disabled={loading}
               >
                 {loading ? "Deleting..." : "Delete Course"}
-              </button>
-              <button
-                className="btn btn-info"
-                onClick={() => window.location.href = `/Courses/${course._id}/notes`}
-              >
-                Notes
               </button>
             </div>
           </div>
