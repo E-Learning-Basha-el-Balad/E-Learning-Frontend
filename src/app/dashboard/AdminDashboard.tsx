@@ -37,7 +37,7 @@ interface User {
 }
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'logs' | 'deleteUser' | 'deleteCourse'>('logs');
+  const [activeTab, setActiveTab] = useState<'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'deleteUser' | 'deleteCourse' | 'logs'>('courses');
   const [logs, setLogs] = useState<Log[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
@@ -47,8 +47,12 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleButtonClick = (tab: 'logs' | 'deleteUser' | 'deleteCourse') => {
-    setActiveTab(tab);
+  const handleButtonClick = (tab: 'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'deleteUser' | 'deleteCourse' | 'logs') => {
+      setActiveTab(tab);
+    };
+  const handleForumClick = (course: Course) => {
+    setSelectedForumCourse(course);
+    setActiveTab('forums');
   };
   const setUser = (newUser: User) => {
     setUserData(newUser);
