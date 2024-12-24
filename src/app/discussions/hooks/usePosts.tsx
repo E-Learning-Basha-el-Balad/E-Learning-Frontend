@@ -14,7 +14,7 @@ const usePosts = (courseId: string | undefined) => {
 
     const fetchPosts = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/discussions/posts/${courseId}`);
+        const response = await fetch(`http://localhost:3000/discussions/posts/${courseId}`);
         const data = await response.json();
         setPosts(data.data);
       } catch (error) {

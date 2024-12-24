@@ -9,7 +9,7 @@ const useCourseAnnouncements = (courseId: string) => {
     // Fetch initial announcements
     const fetchAnnouncements = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/announcements/${courseId}`, { cache: "no-store" });
+        const res = await fetch(`http://localhost:3000/announcements/${courseId}`, { cache: "no-store" });
         const result = await res.json();
         const data = result.data;
         setAnnouncements(data);

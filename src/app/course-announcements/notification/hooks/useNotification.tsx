@@ -1,3 +1,4 @@
+// filepath: /c:/Users/aliia/OneDrive/Desktop/E-Learning-Frontend/src/app/hooks/useNotification.tsx
 import { useEffect, useState } from 'react';
 import { NotificationData } from '@/app/platform-announcements/interfaces/notification';
 import courseAnnouncementSocket from '../../socket/sockets';
@@ -17,6 +18,11 @@ const useNotification = (studentId: string) => {
     courseAnnouncementSocket.on('notification', (data: NotificationData) => {
       console.log('Received data:', data);
       setNotification(data);
+
+      // Clear the notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
     });
 
     // Cleanup function to leave rooms when component unmounts

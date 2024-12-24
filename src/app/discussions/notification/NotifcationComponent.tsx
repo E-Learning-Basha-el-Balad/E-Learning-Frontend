@@ -2,7 +2,8 @@
 import React from 'react';
 import useNotification from './useNotification';
 
-const NotificationComponent = ({ userId }: { userId: string }) => {
+
+const ReplyNotificationComponent = ({ userId }: { userId: string }) => {
   const notification = useNotification(userId);
 
   return (
@@ -17,4 +18,4 @@ const NotificationComponent = ({ userId }: { userId: string }) => {
   );
 };
 
-export default NotificationComponent;
+export default ReplyNotificationComponent;

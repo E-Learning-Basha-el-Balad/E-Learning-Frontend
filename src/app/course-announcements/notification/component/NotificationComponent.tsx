@@ -1,8 +1,9 @@
 "use client";
 import React from 'react';
 import useNotification from '../hooks/useNotification';
+import './NotificationComponent.css';
 
-const NotificationComponent = ({ studentId }: { studentId: string }) => {
+const CourseNotificationComponent = ({ studentId }: { studentId: string }) => {
   const notification = useNotification(studentId);
 
   return (
@@ -17,4 +18,4 @@ const NotificationComponent = ({ studentId }: { studentId: string }) => {
   );
 };
 
-export default NotificationComponent;
+export default CourseNotificationComponent;

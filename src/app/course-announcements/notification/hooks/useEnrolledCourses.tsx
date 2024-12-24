@@ -12,7 +12,7 @@ const useEnrolledCourses = (studentId: string) => {
   useEffect(() => {
     const fetchEnrolledCourses = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/courses/enrolled/${studentId}`, { cache: "no-store" });
+        const res = await fetch(`http://localhost:3000/courses/enrolled/${studentId}`, { cache: "no-store" });
         const result = await res.json();
         setCourses(result);
 

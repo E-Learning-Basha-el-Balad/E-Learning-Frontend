@@ -12,7 +12,7 @@ const useComments = (postId: string) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/discussions/comments/${postId}`);
+        const response = await fetch(`http://localhost:3000/discussions/comments/${postId}`);
         const data = await response.json();
         setComments(data.data);
       } catch (error) {

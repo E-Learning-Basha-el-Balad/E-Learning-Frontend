@@ -1,11 +1,14 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Types } from 'mongoose';
 import { Course } from "../types/Course";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
 import StudentDetailsPage from "./StudentCourseDetails";
-import fetcher from "../utils/fetcher";
+import DiscussionForum from "../discussions/main-component/DiscussionForum";
+import CourseNotificationComponent from "../course-announcements/notification/component/NotificationComponent";
+import ReplyNotificationComponent from "../discussions/notification/NotifcationComponent";
+import ViewCourseAnnouncements from "../course-announcements/view/ViewCourseAnnouncements";
 
 interface User {
   _id: string;
@@ -24,16 +27,23 @@ interface User {
 
 
 const StudentDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'performance' | 'updateDetails' | 'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forms' | 'chat' | 'myCourses'| 'courseDetails'>('performance');
+  const [activeTab, setActiveTab] = useState<'performance' | 'updateDetails' | 'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forums' | 'chat' | 'myCourses'| 'courseDetails' | 'courseAnnouncements'>('performance');
   const [userData, setUserData] = useState<User | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  // use state to select the forum course
+  const [selectedForumCourse, setSelectedForumCourse] = useState<Course | null>(null);
+
+  // use state to select the course for announcements
+  const [selectedAnnouncementCourse, setSelectedAnnouncementCourse] = useState<Course | null>(null);
+
 
   const [searchQuery, setSearchQuery] = useState<string>("");
+
   
 
-  const handleButtonClick = (tab: 'performance' | 'updateDetails' |  'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forms' | 'chat' | 'myCourses') => {
+  const handleButtonClick = (tab: 'performance' | 'updateDetails' | 'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forums' | 'chat' | 'myCourses' | 'courseAnnouncements') => {
     setActiveTab(tab);
   };
 
@@ -81,6 +91,19 @@ const StudentDashboard = () => {
     setSelectedCourse(course);
     setActiveTab('courseDetails');
   };
+
+  //Handle forum click
+  const handleForumClick = (course: Course) => {
+    setSelectedForumCourse(course);
+    setActiveTab('forums');
+  };
+
+  //Handle course announcements click
+  const handleAnnouncementClick = (course: Course) => {
+    setSelectedAnnouncementCourse(course);
+    setActiveTab('courseAnnouncements');
+  };
+ 
   const handleBackButtonClick = () => {
     setSelectedCourse(null);
     setActiveTab('myCourses');
@@ -104,37 +127,8 @@ const StudentDashboard = () => {
       setSearchCourses([]);  
     }
   };
-  const handleLogout = async () => {
-    try {
-      await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
-      window.location.href = '/'; 
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-  const handleDeleteUser = async () => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete your account? This action cannot be undone.'
-    );
   
-    if (confirmed) {
-      try {
-        // Send DELETE request to `deletemyself` endpoint
-        const response = await axios.delete('http://localhost:3000/users/deletemyself', {
-          withCredentials: true, // Include cookies for authentication
-        });
   
-        if (response.status === 200) {
-          // Logout after successful deletion
-          await handleLogout();
-        } else {
-          console.error('Failed to delete account:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error deleting user:', error);
-      }
-    }
-  };
 
   return (
     <>
@@ -332,18 +326,6 @@ const StudentDashboard = () => {
     font-size: 14px;
     color: #777;
   }
-    .delete-button {
-          background-color: #d9534f;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 5px;
-          font-size: 16px;
-          cursor: pointer;
-        }
-        .delete-button:hover {
-          background-color: #c9302c;
-        }
 `}</style>
 
 
@@ -369,9 +351,10 @@ const StudentDashboard = () => {
           <button onClick={() => handleButtonClick('searchCourse')} className={activeTab === 'searchCourse' ? 'active' : ''}>Search Courses</button>
           <button onClick={() => handleButtonClick('searchInstructor')} className={activeTab === 'searchInstructor' ? 'active' : ''}>Search Instructors</button>
           <button onClick={() => handleButtonClick('deleteUser')} className={activeTab === 'deleteUser' ? 'active' : ''}>Delete User</button>
-          <button onClick={() => handleButtonClick('forms')} className={activeTab === 'forms' ? 'active' : ''}>Forms</button>
+          <button onClick={() => handleButtonClick('forums')} className={activeTab === 'forums' ? 'active' : ''}>Discussion Forums</button>
           <button onClick={() => handleButtonClick('chat')} className={activeTab === 'chat' ? 'active' : ''}>Chat</button>
           <button onClick={() => handleButtonClick('myCourses')} className={activeTab === 'myCourses' ? 'active' : ''}>My Courses</button>
+          <button onClick={() => handleButtonClick('courseAnnouncements')} className={activeTab === 'courseAnnouncements' ? 'active' : ''}>Course Announcements</button>
         </div>
       </div>
 
@@ -433,20 +416,38 @@ const StudentDashboard = () => {
           {activeTab === 'deleteUser' && (
             <div>
               <h1>Delete User</h1>
-              <p>
-                Warning: you are about to delete your account.
-              </p>
-              <button onClick={handleDeleteUser} className="delete-button">
-                Delete My Account
-              </button>
+              {/* Button for deleting the user */}
             </div>
           )}
-          {activeTab === 'forms' && (
-            <div>
-              <h1>Forms</h1>
-              {/* Form section */}
-            </div>
-          )}
+           {activeTab === 'forums' && (
+              <div>
+                <h1>Discussion Forums</h1>
+                {courses.length > 0 ? (
+                  <div className="course-container">
+                    {courses.map(course => (
+                      <div
+                        className="course-card"
+                        key={course._id}
+                        onClick={() => handleForumClick(course)} 
+                      >
+                        <div className="course-title">{course.title}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>You are not enrolled in any courses yet, enroll in a course to access its forum.</p>
+                )}
+                {selectedForumCourse && (
+                  <DiscussionForum
+                    courseId={selectedForumCourse._id}
+                    userId={userData?._id || ''}
+                    userRole={userData?.role || ''}
+                    courseName={selectedForumCourse.title}
+
+                  />
+                )}
+              </div>
+            )}
           {activeTab === 'chat' && (
             <div>
               <h1>Chat</h1>
@@ -486,9 +487,41 @@ const StudentDashboard = () => {
               )}
             </div>
           )}
+          {activeTab === 'courseAnnouncements' && (
+            <div>
+              <h1>Course Announcements</h1>
+              {courses.length > 0 ? (
+                <div className="course-container">
+                  {courses.map(course => (
+                    <div
+                      className="course-card"
+                      key={course._id}
+                      onClick={() => handleAnnouncementClick(course)} 
+                    >
+                      <div className="course-title">{course.title}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>You are not enrolled in any courses yet, enroll in a course to view course announcements.</p>
+              )}
+              {selectedAnnouncementCourse && (
+                <ViewCourseAnnouncements courseId={selectedAnnouncementCourse._id} userRole={userData?.role || ''} />
+              )}
+            </div>
+          )}
+
         </div>
       </div>
+
+      {userData && (
+      <>
+        <CourseNotificationComponent studentId={userData._id} />
+        <ReplyNotificationComponent userId={userData._id} />
+      </>
+      )}
     </>
   );
 }
+
 export default StudentDashboard;
