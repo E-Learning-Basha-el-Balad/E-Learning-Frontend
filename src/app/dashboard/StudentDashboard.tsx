@@ -29,8 +29,11 @@ const StudentDashboard = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [newName, setNewName] = useState<string>('');
 
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
 
   const handleButtonClick = (tab: 'performance' | 'updateDetails' |  'searchCourse' | 'searchInstructor' | 'deleteUser' | 'forms' | 'chat' | 'myCourses') => {
@@ -44,40 +47,41 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
         const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
-        if (response.status === 200) {
-          setUser(response.data);
-        }
-      } catch (error: unknown) {
-        if(error instanceof Error)
-          console.log(error.message);
-        // if (error.response?.status === 401) {
-        //   return;
-        // }
-        // console.error('Error fetching user data:', error.response?.data || error.message);
+        setUserData(response.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to load user data.');
+      } finally {
+        setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
   
   useEffect(() => {
     const fetchEnrolledCourses = async () => {
+      if (!userData) return;
+
+      setLoading(true);
+      setError(null);
+
       try {
-        if (userData) {
-          const response = await axios.get(`http://localhost:3000/courses/enrolled/${userData._id}`);
-          setCourses(response.data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch enrolled courses', err);
+        const response = await axios.get(`http://localhost:3000/courses/enrolled/${userData._id}`);
+        setCourses(response.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to load courses.');
+      } finally {
+        setLoading(false);
       }
     };
-  
-    if (userData) {
-      fetchEnrolledCourses();
-    }
-  }, [userData]); 
+
+    fetchEnrolledCourses();
+  }, [userData]);
   
   const handleCourseClick = (course: Course) => {
     setSelectedCourse(course);
@@ -90,20 +94,50 @@ const StudentDashboard = () => {
   const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.trim();
     setSearchQuery(query);
+
+    if (!query || activeTab !== 'searchCourse') return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`http://localhost:3000/courses/searchByTitle`, {
+        params: { title: query },
+        withCredentials: true,
+      });
+      setSearchCourses(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to search courses.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleUpdateName = async () => {
+    if (!newName) {
+      setError('Please enter a new name.');
+      return;
+    }
   
-    if (query && activeTab === 'searchCourse') {
-      try {
-        const response = await axios.get(`http://localhost:3000/courses/searchByTitle`, {
-          params: { title: query },
-          withCredentials: true,
-        });
-        setSearchCourses(response.data); 
-      } catch (error) {
-        console.error('Error fetching courses:', error);
-        setSearchCourses([]);  
-      }
-    } else if (!query) {
-      setSearchCourses([]);  
+    if (!userData?._id) {
+      setError('User data is missing, unable to update name.');
+      return;
+    }
+  
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const response = await axios.put(
+        'http://localhost:3000/editname',
+        { name: newName, userId: userData._id }, // Send userId along with the new name
+        { withCredentials: true }
+      );
+      alert('Name updated successfully.');
+      setNewName('');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update name.');
+    } finally {
+      setLoading(false);
     }
   };
   const handleLogout = async () => {
@@ -351,7 +385,8 @@ const StudentDashboard = () => {
 
       <div className="sidebar">
         <img src="/AA.png" alt="Logo" />
-        
+        {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
         {userData && (
           <div className="profile">
             <div className="profile-icon" role="img" aria-label="user-icon">
@@ -391,12 +426,48 @@ const StudentDashboard = () => {
               {/* Display Performance Tracking */}
             </div>
           )}
-          {activeTab === 'updateDetails' && (
-            <div>
-              <h1>Update Your Details</h1>
-              {/* Form for updating user details */}
-            </div>
-          )}
+         {activeTab === 'updateDetails' && (
+  <div>
+    <h1>Change Name</h1>
+    {/* Input field for entering a new name */}
+    <div style={{ marginBottom: '20px' }}>
+      <label htmlFor="username" style={{ display: 'block', marginBottom: '10px' }}>
+        Enter New Name:
+      </label>
+      <input
+        type="text"
+        id="username"
+        value={newName}
+        onChange={(e) => setNewName(e.target.value)}
+        placeholder="New Name"
+        style={{
+          padding: '10px',
+          width: '300px',
+          borderRadius: '5px',
+          border: '1px solid #ccc',
+          fontSize: '16px',
+        }}
+      />
+    </div>
+    {/* Update Name button */}
+    <button
+      style={{
+        backgroundColor: '#007bff',
+        color: 'white',
+        border: 'none',
+        padding: '10px 20px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontSize: '16px',
+      }}
+      onClick={handleUpdateName}
+    >
+      Update Name
+    </button>
+  </div>
+)}
+
+
         
         {activeTab === 'searchCourse' && (
   <div>

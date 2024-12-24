@@ -40,17 +40,11 @@ const AdminDashboard = () => {
   const [courses, setCourses] = useState<Course[]>([]);
 //  const [userData, setUserData] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-  setUsers([{
-    _id: "aksldjflkj",
-    name: "Abdulrahman",
-    email: "a@gmail.com",
-    password: "easy",
-    role: "student",
-    gpa: 0,
-    enrolledCourses: ["asdlkfj", "aslkdjf"],
-    createdCourses: [],
-    createdAt: "sdlfkj"
-  }]);
+  const [userIdToDelete, setUserIdToDelete] = useState<string>('');
+  const [courseIdToDelete, setCourseIdToDelete] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const handleButtonClick = (tab: 'logs' | 'deleteUser' | 'deleteCourse') => {
     setActiveTab(tab);
   };
@@ -59,55 +53,87 @@ const AdminDashboard = () => {
   // };
   useEffect(() => {
     fetchLogs();
-    fetchCourses();
-    fetchUsers();
+   
+    
   }, []);
 
   const fetchLogs = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const response = await axios.get('http://localhost:3000/logs', { withCredentials: true });
       setLogs(response.data);
-    } catch (error: unknown) {
+    } catch (error: any) {
+      setError('Error fetching logs');
       console.error('Error fetching logs:', error);
-    } 
-  };
-
-  const fetchCourses = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/courses', { withCredentials: true });
-      setCourses(response.data);
-    } catch (error: unknown) {
-      console.error('Error fetching courses:', error);
+    } finally {
+      setLoading(false);
     }
   };
+ 
 
-  const fetchUsers = async () => {
+  const handleDeleteCourse = async () => {
+    if (!courseIdToDelete) {
+      alert('Please enter a valid Course ID.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete the course with ID: ${courseIdToDelete}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
     try {
-    //  const response = await axios.get('http://localhost:3000/users', { withCredentials: true });
-    //  setUser(response.data);
-    } catch (error: unknown) {
-      console.error('Error fetching users:', error);
+      await axios.delete("http://localhost:3000/courses/delete", {
+        withCredentials: true,
+        data: { courseId: courseIdToDelete },
+      });
+
+      setCourses(courses.filter((course) => course._id !== courseIdToDelete));
+      setCourseIdToDelete('');
+      alert('Course deleted successfully.');
+    } catch (error: any) {
+      setError('Failed to delete the course');
+      console.error('Error deleting course:', error);
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   
 
-  const handleDeleteCourse = async (courseId: string) => {
-    try {
-      await axios.delete(`http://localhost:3000/courses/${courseId}`, { withCredentials: true });
-      setCourses(courses.filter(course => course._id !== courseId));
-    } catch (error: unknown) {
-      console.error('Error deleting course:', error);
-      
-    }
-  };
+  
 
-  const handleDeleteUser = async (userId: string) => {
+  
+
+  const handleDeleteUser = async () => {
+    if (!userIdToDelete) {
+      alert('Please enter a valid User ID.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete the user with ID: ${userIdToDelete}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
     try {
-      await axios.delete(`http://localhost:3000/users/${userId}`, { withCredentials: true });
-    //  setUsers(users.filter(user => user._id !== userId)); // Remove the deleted user from the list
-    } catch (error: unknown) {
+      await axios.delete('http://localhost:3000/users/deleteuser', {
+        withCredentials: true,
+        data: { userId: userIdToDelete },
+      });
+
+      setUsers(users.filter((user) => user._id !== userIdToDelete));
+      setUserIdToDelete('');
+      alert('User deleted successfully.');
+    } catch (error: any) {
+      setError('Failed to delete the user. Please try again.');
       console.error('Error deleting user:', error);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -314,6 +340,11 @@ const AdminDashboard = () => {
           <button onClick={() => handleButtonClick('logs')}>Logs</button>
           <button onClick={() => handleButtonClick('deleteUser')}>Delete User</button>
           <button onClick={() => handleButtonClick('deleteCourse')}>Delete Course</button>
+          {error && (
+  <div style={{ color: 'red', marginTop: '20px' }}>
+    <strong>Error:</strong> {error}
+  </div>
+)}
         </div>
         <div className="dashboard-container" style={{ marginLeft: '250px' }}>
           <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
@@ -343,35 +374,119 @@ const AdminDashboard = () => {
               </table>
             </div>
           )}
-          {activeTab === 'deleteCourse' && (
+          {activeTab === 'deleteUser' && (
+        <div>
+          <h3>Delete Users</h3>
+          {/* Input field for user ID */}
+          <div style={{ marginBottom: '20px' }}>
+            <label htmlFor="userId" style={{ display: 'block', marginBottom: '10px' }}>
+              Enter User ID:
+            </label>
+            <input
+              type="text"
+              id="userId"
+              value={userIdToDelete}
+              onChange={(e) => setUserIdToDelete(e.target.value)}
+              placeholder="User ID"
+              style={{
+                padding: '10px',
+                width: '300px',
+                borderRadius: '5px',
+                border: '1px solid #ccc',
+                fontSize: '16px',
+              }}
+            />
+          </div>
+          {/* Red delete button */}
+          <button
+            style={{
+              backgroundColor: 'red',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '16px',
+            }}
+            onClick={handleDeleteUser}
+          >
+            Delete User
+          </button>
+          {/* List of users with delete icons */}
+          <ul style={{ marginTop: '30px', listStyleType: 'none', padding: 0 }}>
+            {users.map((user) => (
+              <li key={user._id} style={{ marginBottom: '10px', fontSize: '16px' }}>
+                {user.name} ({user._id}){' '}
+                <FaUserMinus
+                  style={{ cursor: 'pointer', color: 'red' }}
+                  onClick={() => {
+                    setUserIdToDelete(user._id); // Prefill user ID
+                    handleDeleteUser(); // Trigger delete
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {activeTab === 'deleteCourse' && (
             <div>
               <h3>Delete Courses</h3>
-              <ul>
-                {courses.map(course => (
-                  <li key={course._id}>
-                    {course.title} <FaTrash onClick={() => handleDeleteCourse(course._id)} />
+              <div style={{ marginBottom: '20px' }}>
+                <label htmlFor="courseId" style={{ display: 'block', marginBottom: '10px' }}>
+                  Enter Course ID:
+                </label>
+                <input
+                  type="text"
+                  id="courseId"
+                  value={courseIdToDelete}
+                  onChange={(e) => setCourseIdToDelete(e.target.value)}
+                  placeholder="Course ID"
+                  style={{
+                    padding: '10px',
+                    width: '300px',
+                    borderRadius: '5px',
+                    border: '1px solid #ccc',
+                    fontSize: '16px',
+                  }}
+                />
+              </div>
+              <button
+                style={{
+                  backgroundColor: 'red',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                }}
+                onClick={handleDeleteCourse}
+              >
+                Delete Course
+              </button>
+              <ul style={{ marginTop: '30px', listStyleType: 'none', padding: 0 }}>
+                {courses.map((course) => (
+                  <li key={course._id} style={{ marginBottom: '10px', fontSize: '16px' }}>
+                    {course.title} ({course._id}){' '}
+                    <FaTrash
+                      style={{ cursor: 'pointer', color: 'red' }}
+                      onClick={() => {
+                        setCourseIdToDelete(course._id);
+                        handleDeleteCourse();
+                      }}
+                    />
                   </li>
                 ))}
               </ul>
             </div>
           )}
-          {activeTab === 'deleteUser' && (
-  <div>
-    <h3>Delete Users</h3>
-    <ul>
-      {users.map(user => (
-        <li key={user._id}>
-          {user.name} <FaUserMinus onClick={() => handleDeleteUser(user._id)} />
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
         </div>
       </div>
     </>
   );
 };
 
+
+       
 export default AdminDashboard;

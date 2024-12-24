@@ -1,54 +1,46 @@
-// 'use client'
-// import { useSearchParams } from 'next/navigation'; 
-// import InstructorDashboard from './InstructorDashboard';
-// import AdminDashboard from './AdminDashboard';
-// import StudentDashboard from './StudentDashboard';
-// const Dashboard = () => {
-//   const searchParams = useSearchParams();
-//   const role = searchParams.get('role'); 
-
-//   if (!role) {
-//     return <div>Loading...</div>; 
-//   }
-
-
-//   if (role === 'instructor') {
-//     return <InstructorDashboard />;
-//   } else if (role === 'student') {
-//     return <StudentDashboard/>;
-//   } else if (role === 'admin') {
-//     return <AdminDashboard/>;
-//   }
-
-//   return <div>Role Not Recognized</div>;
-// };
-
-// export default Dashboard;
-
-"use client";
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+'use client'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import InstructorDashboard from './InstructorDashboard';
 import AdminDashboard from './AdminDashboard';
 import StudentDashboard from './StudentDashboard';
 
-const DashboardContent = () => {
-  const searchParams = useSearchParams();
-  const role = searchParams.get('role');
+const Dashboard = () => {
+  const [role, setRole] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  if (!role) {
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
+        if (response.data && response.data.role) {
+          setRole(response.data.role);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Handle error based on your requirement (e.g., redirect to login)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (role === 'instructor') {
-    return <InstructorDashboard />;
-  } else if (role === 'student') {
-    return <StudentDashboard />;
-  } else if (role === 'admin') {
-    return <AdminDashboard />;
+  switch (role) {
+    case 'instructor':
+      return <InstructorDashboard />;
+    case 'student':
+      return <StudentDashboard />;
+    case 'admin':
+      return <AdminDashboard />;
+    default:
+      return <div>Role Not Recognized</div>;
   }
-
-  return <div>Role Not Recognized</div>;
 };
 
 const Dashboard = () => {
