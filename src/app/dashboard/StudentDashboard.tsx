@@ -5,6 +5,7 @@ import { Types } from 'mongoose';
 import { Course } from "../types/Course";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
 import StudentDetailsPage from "./StudentCourseDetails";
+import fetcher from "../utils/fetcher";
 
 interface User {
   _id: string;
@@ -105,8 +106,37 @@ const StudentDashboard = () => {
       setSearchCourses([]);  
     }
   };
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
+      window.location.href = '/'; 
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+  const handleDeleteUser = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your account? This action cannot be undone.'
+    );
   
+    if (confirmed) {
+      try {
+        // Send DELETE request to `deletemyself` endpoint
+        const response = await axios.delete('http://localhost:3000/users/deletemyself', {
+          withCredentials: true, // Include cookies for authentication
+        });
   
+        if (response.status === 200) {
+          // Logout after successful deletion
+          await handleLogout();
+        } else {
+          console.error('Failed to delete account:', response.data.message);
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
+    }
+  };
 
   return (
     <>
@@ -304,6 +334,18 @@ const StudentDashboard = () => {
     font-size: 14px;
     color: #777;
   }
+    .delete-button {
+          background-color: #d9534f;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          font-size: 16px;
+          cursor: pointer;
+        }
+        .delete-button:hover {
+          background-color: #c9302c;
+        }
 `}</style>
 
 
@@ -393,7 +435,12 @@ const StudentDashboard = () => {
           {activeTab === 'deleteUser' && (
             <div>
               <h1>Delete User</h1>
-              {/* Button for deleting the user */}
+              <p>
+                Warning: you are about to delete your account.
+              </p>
+              <button onClick={handleDeleteUser} className="delete-button">
+                Delete My Account
+              </button>
             </div>
           )}
           {activeTab === 'forms' && (
@@ -446,5 +493,4 @@ const StudentDashboard = () => {
     </>
   );
 }
-
 export default StudentDashboard;

@@ -34,6 +34,7 @@ const CreateModulePage = () => {
 
     try {
       const response = await axios.post(
+       
         `http://localhost:3000/courses/${courseId}/modules`,
         formData,
         {
@@ -41,13 +42,15 @@ const CreateModulePage = () => {
         }
       );
 
+      // In your handleSubmit function, update the success redirect:
       if (response.status === 201) {
         setMessage('Module created successfully');
         setRed(false);
-        // Navigate back to course details after successful creation
+        // Navigate to create question page with the new module ID
         setTimeout(() => {
-          router.push(`/Courses/${courseId}`);
+          router.push(`/questions/create?moduleId=${response.data._id}`);
         }, 2000);
+ 
       }
     } catch (error: unknown) {
       if(error instanceof Error){
