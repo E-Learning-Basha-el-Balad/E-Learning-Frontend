@@ -23,7 +23,9 @@ export default function CourseById() { // useRouter() gives access to URL params
       const fetchCourse = async () => {
         try {
           // Fetch the course using the id as part of the URL
-          const response = await axios.get(`http://localhost:3000/Courses/${id}`);
+          const response = await axios.get(`http://localhost:3000/Courses/${id}`,{
+            withCredentials:true
+          });
           setCourse(response.data); // Assume the response contains a single course
           setLoading(false); // Done loading
         } catch (err) {

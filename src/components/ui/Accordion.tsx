@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Module } from "../../app/types/Module";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -169,6 +169,31 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
     fetchAllNotes();
   }, [modules]);
 
+  const toggleOutdated = async (moduleId: string,course_id:string, outdatedStatus: boolean) => {
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/courses/${course_id}/modules/${moduleId}/flag`, 
+        { "flag": !outdatedStatus },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const updatedModules = modules.map((module) =>
+          module._id === moduleId ? { ...module, outdated: !outdatedStatus } : module
+        );
+        // Update the modules state with the new outdated status
+        // Assuming you have a state to manage `modules` in the parent component
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error updating outdated status", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="accordion accordion-flush" id="accordionFlushExample">
       {modules.map((module) => (
@@ -182,7 +207,7 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
               aria-expanded="false"
               aria-controls={`flush-collapse-${module._id}`}
             >
-              {module.title}
+           {module.title}
             </button>
           </h2>
           <div
@@ -209,7 +234,11 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
               </a>
               }
               {isInstructor && (
-                <a href={`/questions?moduleId=${module._id}`} className="btn btn-secondary">
+  }
+
+              {
+                isInstructor &&
+              <a href={`/questions?moduleId=${module._id}`} className="btn btn-secondary me-2">
                   <i className="bi bi-question-circle me-2"></i>
                   View Question Banks
                 </a>
@@ -290,6 +319,28 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
               </div>
               </>
 }
+}
+
+
+              {
+                isInstructor &&
+              
+              <a href={`/Courses/${module.course_id}}/update-module/${module._id}`} className="btn btn-secondary me-2">
+                <i className="bi bi-pencil-square me-2" />
+                Edit Module
+              </a>
+}
+
+              {/* Button to toggle the outdated status */}
+              {isInstructor && (
+                <button
+                  className={`btn ${module.outdated ? 'btn-danger' : 'btn-warning'}`}
+                  onClick={() => toggleOutdated(module._id,module.course_id,module.outdated)}
+                  disabled={loading}
+                >
+                  {module.outdated ? 'Outdated' : 'Set Outdated'}
+                </button>
+              )}
             </div>
           </div>
         </div>
