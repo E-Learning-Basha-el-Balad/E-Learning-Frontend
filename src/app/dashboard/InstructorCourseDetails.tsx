@@ -70,15 +70,18 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
   const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = e.currentTarget.email.value;
-
+    console.error(email);
+  
     try {
-      const response = await axios.post("http://localhost:3000/courses/invite", {
-        withCredentials: true,
-        data: { courseId: course._id },
-      });
+      const response = await axios.post(
+        "http://localhost:3000/courses/invite", 
+        { courseId: course._id, email:email }, 
+        { withCredentials: true }
+      );
+      
       if (response.status === 201) {
         console.log(`Invite sent to ${email}`);
-        setMessage(`Invitation sent to ${email}.`);
+        setMessage(` ${email} Enrolled to course.`);
         setRed(false);
       }
     } catch (error: any) {
@@ -96,12 +99,12 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
     if (newKeyword.trim() !== "") {
       try {
         const response = await axios.post(
-          `http://localhost:3000/courses/keyword`,
-          { keyword: newKeyword.trim() },
+          `http://localhost:3000/courses/keyword/${course._id}`,
+          { keyword: newKeyword.trim()},
           { withCredentials: true }
         );
 
-        if (response.status === 200) {
+        if (response.status === 201) {
           course.keywords.push(newKeyword.trim());
           setNewKeyword("");
           setMessage("Keyword added successfully.");
@@ -214,25 +217,37 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
             </form>
           </div>
 
-{/* Course Management Section */}
-<div className="mt-5">
-  <h2 className="h5">COURSE MANAGEMENT</h2>
-  <div className="d-flex gap-3">
-    <button
-      className="btn btn-primary"
-      onClick={() => window.location.href = `/Courses/${course._id}/create-module`}
-    >
-      Create New Module
-    </button>
-    <button
-      className="btn btn-danger"
-      onClick={handleDelete}
-      disabled={loading}
-    >
-      {loading ? "Deleting..." : "Delete Course"}
-    </button>
-  </div>
-</div>
+          {/* Course Management Section */}
+          <div className="mt-5">
+            <h2 className="h5">COURSE MANAGEMENT</h2>
+            <div className="d-flex gap-3">
+              <button
+                className="btn btn-primary"
+                onClick={() => window.location.href = `/Courses/${course._id}/create-module`}
+              >
+                Create New Module
+              </button>
+              <button
+                className="btn btn-warning"
+                onClick={() => window.location.href = `/Courses/${course._id}/update`}
+              >
+                Update Course
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                {loading ? "Deleting..." : "Delete Course"}
+              </button>
+              <button
+                className="btn btn-info"
+                onClick={() => window.location.href = `/Courses/${course._id}/notes`}
+              >
+                Notes
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
