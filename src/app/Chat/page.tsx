@@ -55,6 +55,7 @@ const Chat = () => {
   },[socket]);
 
   const handleChatClick = (currChat) => {
+    setError('');
     if (chatId && messages.length > 0) {
       setMessagesMap((prev) => ({
         ...prev,
@@ -79,6 +80,7 @@ const Chat = () => {
   };
 
   const handleSendMessage = () => {
+    setError('');
   if (messageInput.trim() && chatId) {
     const newMessage = {
       sender: localStorage.getItem('userId'),
@@ -103,16 +105,19 @@ const Chat = () => {
 };
 
   const handleNewUserClick = (userId) => {
+    setError('');
     setChatId(userId);
     setMessages([]);
   }
 
   const handleBrowseUsers = () => {
+    setError('');
     socket.emit('browseUsers');
     socket.on('browse-users-reply', (allUsers) => setUsers(allUsers.filter((user) => user._id !== localStorage.getItem('userId'))));
   }
   
   const handleUserClick = (userId) => {
+    setError('');
     setGroupUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId) // Remove if already selected
@@ -121,6 +126,7 @@ const Chat = () => {
   };
 
   const handleCreateGroup = () => {
+    setError('');
     if(groupName && groupUsers){
       const newGroup = {
         name : groupName,
@@ -161,7 +167,7 @@ const Chat = () => {
             </button>
       </div>
     ))}
-    {emptyChats.length &&
+    {emptyChats.length > 0 &&
     emptyChats.map((user) => (
       <div key={user._id}>
         <button
