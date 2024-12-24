@@ -6,6 +6,7 @@ import { Course } from "../types/Course";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
 import StudentDetailsPage from "./StudentCourseDetails";
 import fetcher from "../utils/fetcher";
+import StudentProgressReport from "../progress/student/page";
 
 interface User {
   _id: string;
@@ -422,7 +423,7 @@ const StudentDashboard = () => {
           {activeTab === 'performance' && (
             <div>
               <h1>Performance Tracking</h1>
-              {/* Display Performance Tracking */}
+              <StudentProgressReport />;
             </div>
           )}
          {activeTab === 'updateDetails' && (

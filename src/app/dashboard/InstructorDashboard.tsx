@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 
 import { Module } from "../types/Module";
+import InstructorProgressReport from "../progress/instructor/page";
 const ISDP = ({ student }: { student: Student }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -561,6 +562,13 @@ const Dashboard = () => {
              ))}
            </div>
          </>
+          )}
+
+          {activeTab === 'performance' && (
+                      <div>
+                        <h1>Performance Tracking</h1>
+                        <InstructorProgressReport />;
+                      </div>
           )}
 
 
