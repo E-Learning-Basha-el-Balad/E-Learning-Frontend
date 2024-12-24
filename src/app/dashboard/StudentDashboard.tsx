@@ -116,19 +116,14 @@ const StudentDashboard = () => {
       setError('Please enter a new name.');
       return;
     }
-  
-    if (!userData?._id) {
-      setError('User data is missing, unable to update name.');
-      return;
-    }
-  
+
     setLoading(true);
     setError(null);
   
     try {
       const response = await axios.put(
-        'http://localhost:3000/editname',
-        { name: newName, userId: userData._id }, // Send userId along with the new name
+        'http://localhost:3000/users/editname',
+        { name: newName },
         { withCredentials: true }
       );
       alert('Name updated successfully.');
@@ -342,9 +337,13 @@ const StudentDashboard = () => {
 
 
       <div className="sidebar">
+      {error && (
+  <div style={{ color: 'red', marginTop: '20px' }}>
+    <strong>Error:</strong> {error}
+  </div>
+)}
         <img src="/AA.png" alt="Logo" />
-        {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+       
         {userData && (
           <div className="profile">
             <div className="profile-icon" role="img" aria-label="user-icon">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaTrash, FaUserMinus } from 'react-icons/fa';
+import { ObjectId } from 'mongoose';
 
 interface Log {
   _id: string;
@@ -32,6 +33,7 @@ interface User {
   enrolledCourses: string[];
   createdCourses: string[];
   createdAt: string;
+  setActive: boolean;
 }
 
 const AdminDashboard = () => {
@@ -70,7 +72,63 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
- 
+ const handleGet= async (userId:string) => { 
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get('http://localhost:3000/users', { withCredentials: true });
+      setUsers(response.data);
+    } catch (error: any) {
+      //setError("Cant delete user");
+     
+    } finally {
+      setLoading(false);
+    }
+
+  };
+  const handleCheck = async (courseId: string) => { 
+    setLoading(true);
+    setError(null);
+    try{
+      const response = await axios.get('http://localhost:3000/courses/check', { withCredentials: true });
+      setCourses(response.data);
+    }catch(error:any){}
+   finally {
+    setLoading(false);
+  }
+
+};
+  const handleDeleteUser = async () => {
+    if (!userIdToDelete) {
+      setError('Please enter a valid User ID.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete the user with ID: ${userIdToDelete}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    handleGet(userIdToDelete);
+    
+    try {
+      await axios.delete('http://localhost:3000/users/deleteuser', {
+        withCredentials: true,
+        data: { userId: userIdToDelete },
+      });
+
+      setUsers(users.filter((user) => user._id !== userIdToDelete));
+      setUserIdToDelete('');
+      alert('User deleted successfully.');
+    } catch (error: any) {
+      setError("Can't delete user");
+     
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   const handleDeleteCourse = async () => {
     if (!courseIdToDelete) {
@@ -81,9 +139,11 @@ const AdminDashboard = () => {
     if (!window.confirm(`Are you sure you want to delete the course with ID: ${courseIdToDelete}?`)) {
       return;
     }
-
+    
     setLoading(true);
     setError(null);
+    handleCheck(courseIdToDelete);
+
     try {
       await axios.delete("http://localhost:3000/courses/delete", {
         withCredentials: true,
@@ -95,7 +155,7 @@ const AdminDashboard = () => {
       alert('Course deleted successfully.');
     } catch (error: any) {
       setError('Failed to delete the course');
-      console.error('Error deleting course:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -108,34 +168,6 @@ const AdminDashboard = () => {
 
   
 
-  const handleDeleteUser = async () => {
-    if (!userIdToDelete) {
-      alert('Please enter a valid User ID.');
-      return;
-    }
-
-    if (!window.confirm(`Are you sure you want to delete the user with ID: ${userIdToDelete}?`)) {
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      await axios.delete('http://localhost:3000/users/deleteuser', {
-        withCredentials: true,
-        data: { userId: userIdToDelete },
-      });
-
-      setUsers(users.filter((user) => user._id !== userIdToDelete));
-      setUserIdToDelete('');
-      alert('User deleted successfully.');
-    } catch (error: any) {
-      setError('Failed to delete the user. Please try again.');
-      console.error('Error deleting user:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
   
 
   
