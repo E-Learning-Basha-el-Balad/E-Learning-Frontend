@@ -43,13 +43,13 @@ const Dashboard = () => {
   }
 };
 
-const Dashboard = () => {
-  return (
-    <Suspense fallback={<div>Loading Dashboard...</div>}>
-      <DashboardContent />
-    </Suspense>
-  );
-};
+// const Dashboard = () => {
+//   return (
+//     <Suspense fallback={<div>Loading Dashboard...</div>}>
+//       <DashboardContent />
+//     </Suspense>
+//   );
+// };
 
 export default Dashboard;
 

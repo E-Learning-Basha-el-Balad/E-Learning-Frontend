@@ -85,10 +85,8 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
         setMessage(` ${email} Enrolled to course.`);
         setRed(false);
       }
-    } catch (error: unknown) {
-    //  setError(error.response?.data?.message || "An error occurred.");
-      if(error instanceof Error)
-        setMessage(error.message || "An error occurred.");
+    } catch (error: any) {
+      setMessage(error.response.message || "An error occurred.");
       setRed(true);
     } finally {
       if (e.currentTarget) {

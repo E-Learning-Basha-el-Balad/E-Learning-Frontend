@@ -1,24 +1,26 @@
 'use client'
 import axios from "axios";
 import React from "react";
-import { useState } from "react";
-//import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from 'next/image';
-import Link from 'next/link';
-const LoginPage = () => {
+const loginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [red, setRed]= useState<boolean>(false)
-  //const router = useRouter();
+  const [red,setRed]= useState<boolean>(false)
+  const router = useRouter();
   //const [state,formAction]=useActionState(login,{message:''})
 
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("Submit handled");
     e.preventDefault();
 
-    const response = await axios.post('http://localhost:4000/auth/login', {
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    
+    const response = await axios.post('/api/login', {
       email: email,
       password: password,
     }, {
@@ -26,21 +28,18 @@ const LoginPage = () => {
         'Content-Type': 'application/json', // Sending JSON body
       },
     });
-    
-    console.log(response.data.user);
+
+
     //setMessage(response.message)
-    localStorage.setItem('userName', response.data.user.name);
-    localStorage.setItem('userRole', response.data.user.role);
-    localStorage.setItem('userId', response.data.user._id);
-    console.log("Just making sure of the value of the local storage user id which is " + localStorage.getItem('userId'));
-    setRed(false)
-    // if(!response.data.success){
-    //   setRed(true)
-    //  }
-    //  else{
-    //  // router.push('/')
+    if(!response.data.success){
       
-    //  }
+      setRed(true)
+     }
+     else{
+      router.push('/')
+      setRed(false)
+      
+     }
      setMessage(response.data.message)
 };
 
@@ -91,16 +90,6 @@ const LoginPage = () => {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-        <Link href="/" passHref>
-      <h3 style={{
-        color: '#fa2fb5',
-        marginTop: '-50px', // Adjust as needed
-        cursor: 'pointer',
-        textDecoration: 'underline'
-      }}>
-        Go to Home Page
-      </h3>
-    </Link>
         <Image
           src="/AA.png" // Adjust your logo path
           alt="Logo"
@@ -197,4 +186,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default loginPage;

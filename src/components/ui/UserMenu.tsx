@@ -21,7 +21,7 @@ const UserMenu: React.FC<userMenuProps> = ({name , role }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:4000/auth/logout', {}, { withCredentials: true });
+      await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
       window.location.href = '/'; 
     } catch (error) {
       console.error('Logout failed:', error);

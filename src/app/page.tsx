@@ -1,85 +1,73 @@
 'use client'
 import React from "react";
-//import axios from "axios";
-import { useState,useEffect } from "react";
+import axios from "axios";
+import { useActionState, useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/ui/Nav";
-//import Sidebar from "@/components/ui/sidebar";
-//import { Types } from 'mongoose';
-// import Image from 'next/image';
-// import { error } from "console";
-// import { Router } from "next/router";
+import mongoose, { Schema, Document, Types } from 'mongoose';
+import Image from 'next/image';
+import { error } from "console";
+import { Router } from "next/router";
 
-// interface User {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   password: string;
-//   role: string;
-//   gpa: number;
-//   enrolledCourses: Types.ObjectId[]; // Assuming this is an array of course IDs or names
-//   createdCourses: Types.ObjectId[];  // Same as above
-//   createdAt: string; // or Date, depending on how it's stored
-//   updatedAt: string; // or Date
-//   __v: number;
-// }
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  gpa: number;
+  enrolledCourses: Types.ObjectId[]; // Assuming this is an array of course IDs or names
+  createdCourses: Types.ObjectId[];  // Same as above
+  createdAt: string; // or Date, depending on how it's stored
+  updatedAt: string; // or Date
+  __v: number;
+}
 
 
 
 const HomePage = () => {
-  //const [email, setEmail] = useState<string>(); 
-  const [role, setRole] = useState<string>("Guest");
-  const [name, setName] = useState<string>("Guest");
-//  const[enrolledCourses,SetEnrolledCourses]= useState<Types.ObjectId[]>();
-//  const[createdCourses,SetCreatedCourses]= useState<Types.ObjectId[]>();
- // const [guest, setGuest] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>(); 
+  const [role, setRole] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const[id,setId]= useState<string>();
+  const[enrolledCourses,SetEnrolledCourses]= useState<Types.ObjectId[]>();
+  const[createdCourses,SetCreatedCourses]= useState<Types.ObjectId[]>();
+  const [guest, setGuest] = useState<boolean>(false);
   const router = useRouter();
-  //const svgUrl = process.env.REACT_APP_SVG_URL;
+  const svgUrl = process.env.REACT_APP_SVG_URL;
 
- // let new_user;
+  let new_user;
 
-  // const setUser =(new_user:User)=>{
-  //   setId(new_user._id)
-  //   setName(new_user.name)
-  //   setEmail(new_user.email)
-  //   setRole(new_user.role)
-  //   SetEnrolledCourses(new_user.enrolledCourses)
-  //   SetCreatedCourses(new_user.createdCourses)
+  const setUser =(new_user:User)=>{
+    setId(new_user._id)
+    setName(new_user.name)
+    setEmail(new_user.email)
+    setRole(new_user.role)
+    SetEnrolledCourses(new_user.enrolledCourses)
+    SetCreatedCourses(new_user.createdCourses)
 
-  // }
+  }
 
 
   useEffect(() => {
-    // console.log("The id is: " + localStorage.getItem('userId'));
-    // if(localStorage.getItem('userId'))
-    //   setId(localStorage.getItem('userId'));
-    // const fetchData = async () => {
-    //   try {
-    //     const response = await axios.get("http://localhost:4000/auth/userData", { withCredentials: true });
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
   
-    //     if (response.status === 200) {
-    //         setRole(response.data.user.role);
-    //         setName(response.data.user.name);
-    //     }
-    //   } catch (error: unknown) {
-    //     if(error instanceof Error){
-    //       console.log(error.message);
-    //     }
-    //     // if (error.response && error.response.status === 401) {
-    //     //   setRole("guest")
-    //     //   setName("guest");
-    //     //   return;
-    //     // }
-    //     // console.error('Error fetching user data:', error.response?.data || error.message);
-    //   }
-    // };
+        if (response.status === 200) {
+          const new_user = response.data;
+          setUser(new_user);
+        }
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          setRole("guest")
+          return;
+        }
+        console.error('Error fetching user data:', error.response?.data || error.message);
+      }
+    };
   
-    //fetchData();
-
-    if(localStorage.getItem('userId')){
-      setRole(localStorage.getItem('userRole'));
-      setName(localStorage.getItem('userName'));
-    }
+    fetchData();
   }, []); 
 
   const handleBrowseCourses = () => {
@@ -124,7 +112,6 @@ const HomePage = () => {
     `}</style>
 
 <div className="container">
-  {/* <Sidebar/> */}
   <NavBar role={role}  name={name} />
   <h1 className="title" style={{ color: 'white' }}>Welcome to Alpine Academy</h1>
   <p className="content" style={{ color: 'white' }}>
@@ -132,7 +119,7 @@ const HomePage = () => {
   </p>
   <br /><br />
   <p className="content" style={{ fontFamily: 'CustomFont2', color: 'white' }}>
-    Just like every mountain has its summit, every learner has their potential waiting to be reached. At Alpine Academy, we are here to help you scale those heights. Whether you are mastering new skills, exploring fresh topics, or forging your path to success, we have got your back every step of the way.
+    Just like every mountain has its summit, every learner has their potential waiting to be reached. At Alpine Academy, we’re here to help you scale those heights. Whether you're mastering new skills, exploring fresh topics, or forging your path to success, we've got your back every step of the way.
   </p>
   <br /><br />
   <p className="content" style={{ color: 'white' }}>
