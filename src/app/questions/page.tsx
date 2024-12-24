@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaTrash, FaEdit } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<any[]>([]);
@@ -52,17 +53,18 @@ export default function QuestionsPage() {
           setQuestions([]);
           return;
         }
-
+        const token = Cookies.get('jwt');
         const response = await fetch(`http://localhost:3000/question-bank/m/module/${moduleId}`, {
           cache: 'no-store',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
         });
         
-        if (!response.ok) throw new Error('Failed to fetch questions');
+        if (!response.ok) throw new Error('Failed to fetch questions or you are not an instructor');
         const data = await response.json();
         setQuestions(data);
       } catch (err) {
-        setError('Failed to load questions');
+        setError('Failed to load questions or you are not an instructor');
       }
     };
     fetchQuestions();
@@ -73,9 +75,11 @@ export default function QuestionsPage() {
     if (!window.confirm('Are you sure you want to delete this question?')) return;
 
     try {
+      const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:3000/question-bank/${questionId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json'},
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to delete question');
       setQuestions((prevQuestions) => prevQuestions.filter((q) => q._id !== questionId));
@@ -131,9 +135,11 @@ export default function QuestionsPage() {
     setError(null);
 
     try {
+      const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:3000/question-bank/${editingQuestion._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
       if (!response.ok) throw new Error('Failed to update question');

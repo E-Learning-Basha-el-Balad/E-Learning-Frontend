@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
+import Cookies from 'js-cookie';
 interface Answer {
   question_id: {
     question_text: string;
@@ -50,7 +50,12 @@ export default function QuizResultPage() {
         }
   
         try {
-          const response = await fetch(`http://localhost:3000/responses/${response_id}`);
+          const token = Cookies.get('jwt'); 
+          const response = await fetch(`http://localhost:3000/responses/${response_id}`,{
+            headers: {
+              'Content-Type': 'application/json'},
+            credentials: 'include',
+          });
           if (!response.ok) throw new Error('Failed to fetch result');
           
           const data = await response.json();

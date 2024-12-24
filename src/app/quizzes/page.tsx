@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaTrash, FaEdit } from 'react-icons/fa';
-
+import Cookies from 'js-cookie';
 export default function QuizzesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,9 +27,11 @@ export default function QuizzesPage() {
       if (!moduleId) return;
       
       try {
+        const token = Cookies.get('jwt');
         const response = await fetch(`http://localhost:3000/courses/any/modules/${moduleId}`, {
           cache: 'no-store',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
         });
         
         if (!response.ok) throw new Error('Failed to fetch module details');
@@ -62,7 +64,7 @@ export default function QuizzesPage() {
         // If data is a single quiz, convert to array, otherwise use as is
         setQuizzes(Array.isArray(data) ? data : [data]);
       } catch (err) {
-        setError('Failed to load quizzes');
+        setError('Failed to load quizzes  or you are not authorized to access this page');
       }
     };
     fetchQuizzes();
@@ -122,10 +124,12 @@ export default function QuizzesPage() {
     setError(null);
 
     try {
+      const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:3000/quizzes/${editingQuiz._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          credentials: 'include'
         },
         body: JSON.stringify({
           typeOfQuestions: formData.typeOfQuestions,
@@ -159,9 +163,11 @@ export default function QuizzesPage() {
     if (!window.confirm('Are you sure you want to delete this quiz?')) return;
 
     try {
+      const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:3000/quizzes/${quizId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to delete quiz');
       setQuizzes((prevQuizzes) => prevQuizzes.filter((quiz) => quiz._id !== quizId));
@@ -196,14 +202,14 @@ export default function QuizzesPage() {
       {editingQuiz ? (
         <div className="card mb-4 p-4">
           <h5 className="card-title">
-            Edit Quiz for Module: {editingQuiz.module_id}
+            Edit Quiz for Module: {moduleTitle}
           </h5>
           <form onSubmit={handleUpdate}>
             <div className="mb-3">
-              <label className="form-label">Module ID:</label>
+              <label className="form-label">Module Title:</label>
               <input
                 type="text"
-                value={formData.module_id}
+                value={moduleTitle}
                 className="form-control"
                 disabled
               />
@@ -293,39 +299,7 @@ export default function QuizzesPage() {
                     </div>
 
                     <div className="mt-4">
-                      <h5 className="mb-3">Questions:</h5>
-                      <div className="list-group">
-                        {quiz.questionsA && quiz.questionsA.length > 0 && (
-                          <div className="mb-4">
-                            <span className="badge bg-danger mb-2 fs-6">Hard</span>
-                            {quiz.questionsA.map((q: any, index: number) => (
-                              <div key={index} className="list-group-item py-3">
-                                {q.question_text}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {quiz.questionsB && quiz.questionsB.length > 0 && (
-                          <div className="mb-4">
-                            <span className="badge bg-warning mb-2 fs-6">Medium</span>
-                            {quiz.questionsB.map((q: any, index: number) => (
-                              <div key={index} className="list-group-item py-3">
-                                {q.question_text}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {quiz.questionsC && quiz.questionsC.length > 0 && (
-                          <div className="mb-4">
-                            <span className="badge bg-success mb-2 fs-6">Easy</span>
-                            {quiz.questionsC.map((q: any, index: number) => (
-                              <div key={index} className="list-group-item py-3">
-                                {q.question_text}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      
                     </div>
                   </div>
                 </div>

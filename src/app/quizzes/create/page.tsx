@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
+import Cookies from 'js-cookie';
 export default function CreateQuizPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -12,10 +12,45 @@ export default function CreateQuizPage() {
     module_id: moduleId || '',
     typeOfQuestions: [] as string[],
     numOfQuestions: 0,
-    questions: [] as string[],
+    questionsA: [] as any[],
+    questionsB: [] as any[],
+    questionsC: [] as any[],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [availableQuestions, setAvailableQuestions] = useState({
+    A: 0,
+    B: 0,
+    C: 0
+  });
+
+  // Fetch available questions count
+  useEffect(() => {
+    const fetchQuestionCounts = async () => {
+      if (!moduleId) return;
+
+      try {
+        const response = await fetch(`http://localhost:3000/question-bank/m/module/${moduleId}`, {
+          credentials: 'include',
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch questions');
+        
+        const questions = await response.json();
+        const counts = {
+          A: questions.filter((q: any) => q.difficulty === 'A').length,
+          B: questions.filter((q: any) => q.difficulty === 'B').length,
+          C: questions.filter((q: any) => q.difficulty === 'C').length
+        };
+        
+        setAvailableQuestions(counts);
+      } catch (err) {
+        console.error('Error fetching questions:', err);
+      }
+    };
+
+    fetchQuestionCounts();
+  }, [moduleId]);
 
   // Update formData when moduleId changes
   useEffect(() => {
@@ -69,13 +104,38 @@ export default function CreateQuizPage() {
     setLoading(true);
     setError(null);
 
+    // Validate question counts
+    const requiredQuestions = Math.ceil(formData.numOfQuestions / 3);
+    if (availableQuestions.A < requiredQuestions) {
+      setError(`Not enough Hard (A) questions. Available: ${availableQuestions.A}, Required: ${requiredQuestions}`);
+      setLoading(false);
+      return;
+    }
+    if (availableQuestions.B < requiredQuestions) {
+      setError(`Not enough Medium (B) questions. Available: ${availableQuestions.B}, Required: ${requiredQuestions}`);
+      setLoading(false);
+      return;
+    }
+    if (availableQuestions.C < requiredQuestions) {
+      setError(`Not enough Easy (C) questions. Available: ${availableQuestions.C}, Required: ${requiredQuestions}`);
+      setLoading(false);
+      return;
+    }
+
     try {
+      const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:3000/quizzes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        credentials: 'include',
+        body: JSON.stringify({
+          ...formData,
+          questionsA: [],
+          questionsB: [],
+          questionsC: [],
+        }),
       });
 
       if (!response.ok) {
@@ -184,6 +244,14 @@ export default function CreateQuizPage() {
                       required
                     />
                   </div>
+                </div>
+
+                {/* Add question availability information */}
+                <div className="alert alert-info mb-4">
+                  <h6 className="mb-2">Available Questions:</h6>
+                  <div>Hard (A): {availableQuestions.A}</div>
+                  <div>Medium (B): {availableQuestions.B}</div>
+                  <div>Easy (C): {availableQuestions.C}</div>
                 </div>
 
                 {/* Submit Button */}
