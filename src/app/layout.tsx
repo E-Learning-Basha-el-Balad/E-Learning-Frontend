@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import 'bootstrap/dist/css/bootstrap.css';
-import BootstrapClient from '@/components/BootstrapClient.js';
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+import BootstrapClient from '../components/BootstrapClient'
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,9 +25,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link 
+          rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <BootstrapClient/>
         {children}
       </body>
     </html>

@@ -1,49 +1,64 @@
-'use client'
+'use client';
+import { useState } from "react";
 import axios from "axios";
-import React from "react";
-import { useActionState, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from 'next/image';
-const loginPage = () => {
-  const [email, setEmail] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [red,setRed]= useState<boolean>(false)
+import { useParams, useRouter } from "next/navigation";
+
+const CreateModulePage = () => {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [red, setRed] = useState<boolean | null>(null);
+  const params = useParams();
   const router = useRouter();
-  //const [state,formAction]=useActionState(login,{message:''})
+  const courseId = params.id;
 
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage(null);
 
     const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
+    const title = e.currentTarget.id1.value
+    const resources=e.currentTarget.id2.value
+    const content = e.currentTarget.content.value;
+    const files = e.currentTarget.files.files;
+
+    formData.append('title', title);
+    formData.append('resources', resources);
+    formData.append('content', content);
+    formData.append('courseId', courseId as string);
     
-    const response = await axios.post('/api/login', {
-      email: email,
-      password: password,
-    }, {
-      headers: {
-        'Content-Type': 'application/json', // Sending JSON body
-      },
-    });
+    // Append each file to formData
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
 
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/courses/${courseId}/modules`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
 
-    //setMessage(response.message)
-    if(!response.data.success){
-      
-      setRed(true)
-     }
-     else{
-      router.push('/')
-      setRed(false)
-      
-     }
-     setMessage(response.data.message)
-};
-
-
+      // In your handleSubmit function, update the success redirect:
+      if (response.status === 201) {
+        setMessage('Module created successfully');
+        setRed(false);
+        // Navigate to create question page with the new module ID
+        setTimeout(() => {
+          router.push(`/questions/create?moduleId=${response.data._id}`);
+        }, 2000);
+ 
+      }
+    } catch (error: any) {
+      console.error('Error creating module:', error);
+      setMessage(error.response?.data?.message || 'An error occurred while creating the module');
+      setRed(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -72,118 +87,105 @@ const loginPage = () => {
         align-items: center;
       }
     `}</style>
-    <div style={{
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      maxWidth: '1200px', // Limit max width of the container
-      width: '100%',
-      gap: '20px', // Add a consistent gap
-      padding: '20px'
-    }}>
-      {/* Left side with logo */}
-      <div style={{
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column', // Stack logo and text vertically
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <Image
-          src="/AA.png" // Adjust your logo path
-          alt="Logo"
-          width={500} // Adjust size
-          height={500}
-        />
-        <p style={{
-          color: '#fa2fb5',
-          marginTop: '-100px', // Add spacing below the logo
-          fontSize: '18px', // Adjust text size
-          textAlign: 'center' // Center-align the text
-        }}>
-                      Your learning adventure starts here.
-        </p>
-      </div>
+    <div className="container py-5">
+      <div className="card shadow-lg">
+        {/* Header Section */}
+        <div className="card-header bg-primary text-white text-center py-4">
+          <h1 className="h3" style={{ fontFamily: "CustomFont, sans-serif" }}>
+            Create New Module
+          </h1>
+        </div>
 
-      {/* Right side with login form */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <div className="card" style={{
-          width: "30rem",
-          height: "auto",
-          padding: "20px", // Add padding inside the card
-          borderRadius: "15px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)"
-        }}>
+        {/* Content Section */}
+        <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="card-body">
-              <h5 className="card-title" style={{ textAlign: "center" }}>Welcome Back!</h5>
+            {/* Title Section */}
+            <div className="mb-4">
+              <h2 className="h5">MODULE TITLE</h2>
+              <textarea
+                id="id1"
+                name="id1"
+                className="form-control"
+                rows={1}
+                style={{fontFamily:"CustomFont2"}}
+                required
+              />
+            </div>
 
-              <div className="mb-3">
-                <label htmlFor="emailInput" className="form-label">Email address</label>
-                <input
-                  type="email"
-                  className="form-control rounded-pill"
-                  id="emailInput"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ fontFamily: 'CustomFont2' }}
-                  required
-                />
-              </div>
 
-              <div className="mb-3">
-                <label htmlFor="passwordInput" className="form-label">Password</label>
-                <input
-                  type="password"
-                  className="form-control rounded-pill"
-                  id="passwordInput"
-                  aria-describedby="passwordHelpBlock"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  
-                  style={{ fontFamily: 'CustomFont2' }}
-                  required
-                />
-              </div>
+            <div className="mb-4">
+              <h2 className="h5">MODULE Resouces</h2>
+              <textarea
+                id="id2"
+                name="id2"
+                className="form-control"
+                rows={2}
+                style={{fontFamily:"CustomFont2"}}
+                required
+              />
+            </div>
 
-              <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-                <button
-                  type="submit"
-                  className="btn btn-outline-primary rounded-pill"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#fa2fb5',
-                    borderColor: '#fa2fb5'
-                  }}
-                >
-                  Login
-                </button>
+            {/* Content Section */}
+            <div className="mb-4">
+              <h2 className="h5">MODULE CONTENT</h2>
+              <textarea
+                id="content"
+                name="content"
+                className="form-control"
+                rows={5}
+                style={{fontFamily:"CustomFont2"}}
+                required
+              />
+            </div>
+
+            {/* File Upload Section */}
+            <div className="mb-4">
+              <h2 className="h5">UPLOAD FILES</h2>
+              <input
+                type="file"
+                id="files"
+                name="files"
+                className="form-control"
+                multiple
+                style={{fontFamily:"CustomFont2"}}
+              />
+              <small className="text-muted" style={{fontFamily:"CustomFont2"}}>
+                You can upload multiple files (PDFs, videos, etc.)
+              </small>
+            </div>
+
+            {/* Message Box */}
+            {message && (
+              <div
+                className={`alert ${red ? "alert-danger" : "alert-success"} mt-4`}
+                role="alert"
+              >
+                {message}
               </div>
-              <div>
-            
-                
-               {message && <div className={`alert ${red ? "alert-danger" : "alert-success"}`}  role="alert" style={{ marginTop: "20px" }}>{message}
-                </div>}
-                <div style={{ paddingLeft: '50px'  , marginTop: '20px'}}>
-              <p>
-              Not a member?  
-             <a href="/register" style={{ color: '#fa2fb5' }}> Register here</a>
-             </p>
-              </div>
-                </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="d-flex gap-3">
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create Module"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
             </div>
           </form>
         </div>
       </div>
     </div>
-  </>
+    </>
   );
 };
 
-export default loginPage;
+export default CreateModulePage;
