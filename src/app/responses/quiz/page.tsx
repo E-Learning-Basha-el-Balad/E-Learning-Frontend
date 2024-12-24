@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-
+import Cookies from 'js-cookie';
 interface Question {
   _id: string;
   question_text: string;
@@ -133,11 +133,13 @@ export default function TakeQuizPage() {
 
     setSubmitting(true);
     try {
+      const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:3000/responses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
+          credentials: 'include',
+        }, credentials: 'include',
         body: JSON.stringify({
           quiz_id,
           user_id,
