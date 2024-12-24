@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Course } from "../types/Course";
 import { Module } from "../types/Module";
 import axios from "axios";
+import Accordion from "@/components/ui/Accordion";
 
 const StudentCourseDetails = ({ course }: { course: Course }) => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,7 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
   const [editedContent, setEditedContent] = useState<string>("");
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+
   // Fetch modules for the course
   useEffect(() => {
     const fetchModules = async () => {
@@ -23,27 +25,19 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
 
       try {
         setLoading(true);
-        setError(null);
-
         const response = await axios.get(
           `http://localhost:3000/courses/${course._id}/modules`,
           { withCredentials: true }
         );
-
-        if (response.data && Array.isArray(response.data)) {
-          setModules(response.data);
-          if (response.data.length > 0) {
-            setSelectedModule(response.data[0]._id);
-            setModuleContent(response.data[0].content || "");
-          }
-        }
+        setModules(response.data);
       } catch (err: any) {
-        console.error("Error fetching modules:", err);
-        setError(err.response?.data?.message || "Failed to fetch modules");
+        console.log(err.response)
+        setError("Failed to fetch modules.");
       } finally {
         setLoading(false);
       }
     };
+    
 
     fetchModules();
   }, [course?._id]);
@@ -85,7 +79,7 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
   }, [selectedModule, course?._id]);
 
   // Handle quick note submission
-  const handleQuickNoteSubmit = async () => {
+  const handleQuickNoteSubmit = async (module:any) => {
     if (!newNote.trim() || !selectedModule || !course?._id) {
       setError("Note content cannot be empty and module must be selected");
       return;
@@ -100,8 +94,7 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
         {
           title: "Quick Note",
           content: newNote,
-          studentId: course._id,
-          moduleId: selectedModule,
+          moduleId: module._id,
         },
         { withCredentials: true }
       );
@@ -181,20 +174,18 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
         <div className="card-body">
           {/* Modules Section */}
           <div className="mb-4">
-            <h2 className="h5">MODULES</h2>
-            <select
-              className="form-select mb-3"
-              value={selectedModule || ""}
-              onChange={(e) => setSelectedModule(e.target.value)}
-            >
-              {modules.map((module) => (
-                <option key={module._id} value={module._id}>
-                  {module.title}
-                </option>
-              ))}
-            </select>
+            <h2 className="h5">{course.description}</h2>
+            <div className="mb-4">
+            <h2 className="h5">COURSE MODULES</h2>
+            {modules && modules.length > 0 ? (
+              <Accordion modules={modules} isGuest={false} isInstructor={false} isStudent={true} />
+            ) : (
+              <p style={{ fontFamily: "CustomFont2" }} className="text-muted">No modules available for this course.</p>
+            )}
+          </div>
+            
 
-            <h4>Module Content</h4>
+            {/* <h4>Module Content</h4>
             <div className="border p-3 rounded mb-4">{moduleContent}</div>
 
             <h4>Quick Note</h4>
@@ -207,9 +198,9 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
             <button className="btn btn-primary mb-4" onClick={handleQuickNoteSubmit}>
               Save Note
             </button>
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <h2>Saved Notes</h2>
             {notes.length > 0 ? (
               notes.map((note) => (
@@ -253,9 +244,10 @@ const StudentCourseDetails = ({ course }: { course: Course }) => {
             ) : (
               <p>No notes available for this module</p>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
+    </div>
     </div>
   );
 };
