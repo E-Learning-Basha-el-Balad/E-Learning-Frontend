@@ -234,6 +234,8 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
                 </div>
               )}
 
+              <div>DIV</div>
+
               {isStudent || isInstructor && (
                 <a href={`/quizzes?moduleId=${module._id}`} className="btn btn-primary me-2">
                   <i className="bi bi-file-text me-2"></i>

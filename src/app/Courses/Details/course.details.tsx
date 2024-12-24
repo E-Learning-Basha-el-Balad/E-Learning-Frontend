@@ -53,28 +53,25 @@ export default function CourseDetailsPage({ course }: { course: Course }){
         setMessage("Enrolled Successfully");
         setRed(false);
       }
-    } catch (error : unknown) {
-      // if (error.response && error.response.status === 400) {
-      //   setMessage("Error while enrolling");
-      //   setRed(true);
-      // }
-      // if (error.response && error.response.status === 409) {
-      //   setMessage("Already Enrolled");
-      //   setRed(true);
-      // }
-
-      // if (error.response && error.response.status === 403) {
-      //   setMessage("This User can't enroll in courses");
-      //   setRed(true);
-      // }
-      // if (error.response && error.response.status === 401) {
-      //   setMessage("Please login or sign up to enroll in courses");
-      //   setRed(true);
-      // }
-      if(error instanceof Error){
-        setMessage(error.message);
+    } catch (error : any) {
+      if (error.response && error.response.status === 400) {
+        setMessage("Error while enrolling");
         setRed(true);
       }
+      if (error.response && error.response.status === 409) {
+        setMessage("Already Enrolled");
+        setRed(true);
+      }
+
+      if (error.response && error.response.status === 403) {
+        setMessage("This User can't enroll in courses");
+        setRed(true);
+      }
+      if (error.response && error.response.status === 401) {
+        setMessage("Please login or sign up to enroll in courses");
+        setRed(true);
+      }
+      
     }
   };
 

@@ -182,7 +182,14 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
           <div className="mb-4">
             <h2 className="h5">COURSE MODULES</h2>
             {modules && modules.length > 0 ? (
+
+
+
+
+
               <Accordion modules={modules} isGuest={false} isInstructor={true} isStudent={false} />
+
+              
             ) : (
               <p style={{ fontFamily: "CustomFont2" }} className="text-muted">No modules available for this course.</p>
             )}
