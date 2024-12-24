@@ -16,7 +16,9 @@ const UpdateCoursePage = () => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/courses/${courseId}`);
+        const response = await axios.get(`http://localhost:3000/courses/${courseId}`,{
+          withCredentials:true
+        });
         setCourseData(response.data);
       } catch (error) {
         console.error('Error fetching course data:', error);
