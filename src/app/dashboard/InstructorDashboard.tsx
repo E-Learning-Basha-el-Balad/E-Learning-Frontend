@@ -11,6 +11,10 @@ import { useRouter } from "next/navigation";
 
 
 import { Module } from "../types/Module";
+import ViewCourseAnnouncements from "../course-announcements/view/ViewCourseAnnouncements";
+import CreateCourseAnnouncementForm from "../course-announcements/create/form/CreateCourseAnnouncementForm";
+import DiscussionForum from "../discussions/main-component/DiscussionForum";
+
 const ISDP = ({ student }: { student: Student }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -146,9 +150,13 @@ const IDP = ({ instructor }: { instructor: Instructor | null }) => {
 
 
 const Dashboard = () => {
+  //changed
   const router = useRouter();
   
-  const [activeTab, setActiveTab] = useState<  'user info' | 'courses' | 'performance' | 'chat' | 'forms' | 'students'>('courses');
+  const [activeTab, setActiveTab] = useState<'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'createAnnouncement' | 'viewAnnouncements'>('courses');
+  const [selectedForumCourse, setSelectedForumCourse] = useState<Course | null>(null);
+const [selectedAnnouncementCourse, setSelectedAnnouncementCourse] = useState<Course | null>(null);
+const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useState<Course | null>(null);
   const [userData, setUserData] = useState<Instructor | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
@@ -164,8 +172,23 @@ const Dashboard = () => {
   const handleStudentCardClick = (student: Student) => setSelectedStudent(student);
 
 
-  const handleButtonClick = (tab: 'user info' |  'courses' | 'performance' | 'chat' | 'forms' | 'students') => {
+  const handleButtonClick = (tab: 'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'createAnnouncement' | 'viewAnnouncements') => {
     setActiveTab(tab);
+  };
+
+  const handleForumClick = (course: Course) => {
+    setSelectedForumCourse(course);
+    setActiveTab('forums');
+  };
+  
+  const handleAnnouncementClick = (course: Course) => {
+    setSelectedAnnouncementCourse(course);
+    setActiveTab('createAnnouncement');
+  };
+  
+  const handleViewAnnouncementClick = (course: Course) => {
+    setSelectedViewAnnouncementCourse(course);
+    setActiveTab('viewAnnouncements');
   };
 
   const setUser = (newUser: Instructor) => {
@@ -498,14 +521,6 @@ const Dashboard = () => {
           </div>
           <div className="nav-item">
             <button
-              onClick={() => handleButtonClick('forms')}
-              className={activeTab === 'forms' ? 'active' : ''}
-            >
-              Forms
-            </button>
-          </div>
-          <div className="nav-item">
-            <button
               onClick={() => handleButtonClick('students')}
               className={activeTab === 'students' ? 'active' : ''}
             >
@@ -621,6 +636,82 @@ const Dashboard = () => {
       </>
     )}
   </>
+)}
+{activeTab === 'forums' && (
+  <div>
+    <h1>Discussion Forums</h1>
+    {courses.length > 0 ? (
+      <div className="course-container">
+        {courses.map(course => (
+          <div
+            className="course-card"
+            key={course._id}
+            onClick={() => handleForumClick(course)} 
+          >
+            <div className="course-title">{course.title}</div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>You have not created any courses yet, create a course to access its forum.</p>
+    )}
+    {selectedForumCourse && (
+      <DiscussionForum
+        courseId={selectedForumCourse._id}
+        userId={userData?._id || ''}
+        userRole={userData?.role || ''}
+        courseName={selectedForumCourse.title}
+      />
+    )}
+  </div>
+)}
+
+{activeTab === 'createAnnouncement' && (
+  <div>
+    <h1>Create Course Announcement</h1>
+    {courses.length > 0 ? (
+      <div className="course-container">
+        {courses.map(course => (
+          <div
+            className="course-card"
+            key={course._id}
+            onClick={() => handleAnnouncementClick(course)} 
+          >
+            <div className="course-title">{course.title}</div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>You have not created any courses yet, create a course to make announcements.</p>
+    )}
+    {selectedAnnouncementCourse && userData && (
+      <CreateCourseAnnouncementForm instructorId={userData._id} />
+    )}
+  </div>
+)}
+
+{activeTab === 'viewAnnouncements' && (
+  <div>
+    <h1>View Course Announcements</h1>
+    {courses.length > 0 ? (
+      <div className="course-container">
+        {courses.map(course => (
+          <div
+            className="course-card"
+            key={course._id}
+            onClick={() => handleViewAnnouncementClick(course)} 
+          >
+            <div className="course-title">{course.title}</div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>You have not created any courses yet, create a course to view announcements.</p>
+    )}
+    {selectedViewAnnouncementCourse && (
+      <ViewCourseAnnouncements courseId={selectedViewAnnouncementCourse._id} userRole={userData?.role || ''} />
+    )}
+  </div>
 )}
           
           {activeTab === 'chat' && <div>Chat content goes here</div>}

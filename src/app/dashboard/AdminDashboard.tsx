@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaTrash, FaUserMinus } from 'react-icons/fa';
+import DiscussionForum from '../discussions/main-component/DiscussionForum';
 
 interface Log {
   _id: string;
@@ -35,7 +36,7 @@ interface User {
 }
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'logs' | 'deleteUser' | 'deleteCourse'>('logs');
+  const [activeTab, setActiveTab] = useState<'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'deleteUser' | 'deleteCourse' | 'logs'>('courses');
   const [logs, setLogs] = useState<Log[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 //  const [userData, setUserData] = useState<User | null>(null);
@@ -44,18 +45,25 @@ const AdminDashboard = () => {
   const [courseIdToDelete, setCourseIdToDelete] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedForumCourse, setSelectedForumCourse] = useState<Course | null>(null);
 
-  const handleButtonClick = (tab: 'logs' | 'deleteUser' | 'deleteCourse') => {
-    setActiveTab(tab);
+  const handleButtonClick = (tab: 'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'deleteUser' | 'deleteCourse' | 'logs') => {
+      setActiveTab(tab);
+    };
+  const handleForumClick = (course: Course) => {
+    setSelectedForumCourse(course);
+    setActiveTab('forums');
   };
-  // const setUser = (newUser: User) => {
-  //   setUserData(newUser);
-  // };
+  const setUser = (newUser: User) => {
+    setUserData(newUser);
+  };
   useEffect(() => {
     fetchLogs();
    
     
   }, []);
+
+  
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -113,6 +121,7 @@ const AdminDashboard = () => {
       alert('Please enter a valid User ID.');
       return;
     }
+
 
     if (!window.confirm(`Are you sure you want to delete the user with ID: ${userIdToDelete}?`)) {
       return;
@@ -481,6 +490,47 @@ const AdminDashboard = () => {
               </ul>
             </div>
           )}
+          {activeTab === 'forums' && (
+  <div>
+    <h1>Discussion Forums</h1>
+    {courses.length > 0 ? (
+      <div className="course-container">
+        {courses.map(course => (
+          <div
+            className="course-card"
+            key={course._id}
+            onClick={() => handleForumClick(course)} 
+          >
+            <div className="course-title">{course.title}</div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>You have not created any courses yet, create a course to access its forum.</p>
+    )}
+    {selectedForumCourse && (
+      <DiscussionForum
+        courseId={selectedForumCourse._id}
+        userId={userData?._id || ''}
+        userRole={userData?.role || ''}
+        courseName={selectedForumCourse.title}
+      />
+    )}
+  </div>
+)}
+          {activeTab === 'deleteUser' && (
+  <div>
+    <h3>Delete Users</h3>
+    <ul>
+      {users.map(user => (
+        <li key={user._id}>
+          {user.name} <FaUserMinus onClick={() => handleDeleteUser(user._id)} />
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
         </div>
       </div>
     </>
