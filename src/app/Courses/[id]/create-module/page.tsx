@@ -49,10 +49,12 @@ const CreateModulePage = () => {
           router.push(`/Courses/${courseId}`);
         }, 2000);
       }
-    } catch (error: any) {
-      console.error('Error creating module:', error);
-      setMessage(error.response?.data?.message || 'An error occurred while creating the module');
-      setRed(true);
+    } catch (error: unknown) {
+      if(error instanceof Error){
+        console.error('Error creating module:', error.message);
+        setMessage(error.message || 'An error occurred while creating the module');
+        setRed(true);
+      }
     } finally {
       setLoading(false);
     }

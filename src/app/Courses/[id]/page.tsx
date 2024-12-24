@@ -1,10 +1,10 @@
 "use client";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Course } from "../../types/Course";
-import CourseDetailsPage from "../Details/page";
+import CourseDetailsPage from "../Details/course.details";
 
 export default function CourseById() { // useRouter() gives access to URL params
   const { id } = useParams(); // Extract 'id' from router.query

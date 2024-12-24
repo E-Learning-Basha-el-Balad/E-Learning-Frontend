@@ -3,16 +3,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Instructor } from '../types/Course'; // Assuming Instructor is correctly defined
 import { FaBookOpen } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
 import InstructorDetailsPage from "./details";
 
-const AllInstructorsPage = ({ isGuest }: { isGuest: boolean }) => {
+//const AllInstructorsPage = ({ isGuest }: { isGuest: boolean }) => {
+const AllInstructorsPage = () => {
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [searchInstructors, setSearchInstructors] = useState<Instructor[]>([]); // This holds filtered results
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
   const [error, setError] = useState("");
-  const router = useRouter();
+  //const router = useRouter();
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,10 +31,12 @@ const AllInstructorsPage = ({ isGuest }: { isGuest: boolean }) => {
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/users/instructors"); // Adjust URL as per API
+        console.log("I worked btw")
+        const response = await axios.get("http://localhost:4000/users/instructors"); // Adjust URL as per API
+
         setInstructors(response.data); // Set all instructors
         setSearchInstructors(response.data); // Initialize filtered list
-      } catch (err) {
+      } catch{
         setError("Failed to fetch instructors. Please try again later.");
       }
     };

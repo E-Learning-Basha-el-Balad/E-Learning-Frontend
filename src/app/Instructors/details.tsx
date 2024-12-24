@@ -1,16 +1,16 @@
 "use client";
-import { useState } from "react";
+//import { useState } from "react";
 import { Instructor } from "../types/Course";
 
 const InstructorDetailsPage = ({ Instructor}: { Instructor: Instructor }) => {
   // State for the Instructor details
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+ // const [loading, setLoading] = useState(false); // Loading state
+ // const [error, setError] = useState<string | null>(null); // Error state
 
   // Handle course click
-  const handleCardClick = (course: any) => {
-    window.location.href = `/Courses/${course._id}`;
-  };
+  // const handleCardClick = (course: any) => {
+  //   window.location.href = `/Courses/${course._id}`;
+  // };
 
   return (
     <div className="min-h-screen d-flex justify-content-center align-items-center bg-gradient-to-br from-gray-100 to-gray-300 p-4">

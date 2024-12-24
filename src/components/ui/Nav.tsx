@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React from "react";
 import UserMenu from './UserMenu';
@@ -101,6 +102,12 @@ const NavBar: React.FC<NavBarProps> = ({ role , name }) =>  {
             <div className="navbar-nav">
               <a className="nav-link active" aria-current="page" href="#" style={{ fontFamily: 'CustomFont2' }}>Home</a>
               <a className="nav-link" href="#" style={{ fontFamily: 'CustomFont2' }}>Courses</a>
+              <Link href="/Chat" className="nav-link" style={{ fontFamily: 'CustomFont2' }}>
+        Chat
+      </Link>
+      {role == 'Guest' && <Link href="/login" className="nav-link" style={{ fontFamily: 'CustomFont2' }}>
+        Login
+      </Link>}
             </div>
           </div>
           <div className="navbar-nav ms-auto"> {/* Align to the right */}

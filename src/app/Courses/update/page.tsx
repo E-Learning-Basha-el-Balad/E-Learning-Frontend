@@ -29,7 +29,7 @@ const UpdateCoursePage = () => {
         level,
       };
 
-      const response = await fetcher(
+      await fetcher(
         `http://localhost:3000/courses/${courseId}`,
         {
           method: "PUT",
@@ -45,7 +45,7 @@ const UpdateCoursePage = () => {
 
       // Optionally, navigate back to the course details page
       setTimeout(() => router.push(`/courses/${courseId}`), 2000);
-    } catch (err) {
+    } catch{
       setError("Failed to update course. Please try again.");
       setLoading(false);
     }

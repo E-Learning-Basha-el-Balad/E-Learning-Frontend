@@ -145,7 +145,7 @@ const CreateCourse = () => {
           </div>
           <div className="mb-4">
             <label htmlFor="userId" className="block text-sm font-medium text-gray-700">
-              User ID (Instructor's User ID)
+              User ID (Instructor&apos;s User ID)
             </label>
             <input
               id="userId"

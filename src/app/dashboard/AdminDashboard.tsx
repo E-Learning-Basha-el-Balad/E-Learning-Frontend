@@ -38,15 +38,25 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'logs' | 'deleteUser' | 'deleteCourse'>('logs');
   const [logs, setLogs] = useState<Log[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [userData, setUserData] = useState<User | null>(null);
+//  const [userData, setUserData] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-
+  setUsers([{
+    _id: "aksldjflkj",
+    name: "Abdulrahman",
+    email: "a@gmail.com",
+    password: "easy",
+    role: "student",
+    gpa: 0,
+    enrolledCourses: ["asdlkfj", "aslkdjf"],
+    createdCourses: [],
+    createdAt: "sdlfkj"
+  }]);
   const handleButtonClick = (tab: 'logs' | 'deleteUser' | 'deleteCourse') => {
     setActiveTab(tab);
   };
-  const setUser = (newUser: User) => {
-    setUserData(newUser);
-  };
+  // const setUser = (newUser: User) => {
+  //   setUserData(newUser);
+  // };
   useEffect(() => {
     fetchLogs();
     fetchCourses();
@@ -57,7 +67,7 @@ const AdminDashboard = () => {
     try {
       const response = await axios.get('http://localhost:3000/logs', { withCredentials: true });
       setLogs(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching logs:', error);
     } 
   };
@@ -66,16 +76,16 @@ const AdminDashboard = () => {
     try {
       const response = await axios.get('http://localhost:3000/courses', { withCredentials: true });
       setCourses(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching courses:', error);
     }
   };
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/users', { withCredentials: true });
-      setUser(response.data);
-    } catch (error: any) {
+    //  const response = await axios.get('http://localhost:3000/users', { withCredentials: true });
+    //  setUser(response.data);
+    } catch (error: unknown) {
       console.error('Error fetching users:', error);
     }
   };
@@ -86,7 +96,7 @@ const AdminDashboard = () => {
     try {
       await axios.delete(`http://localhost:3000/courses/${courseId}`, { withCredentials: true });
       setCourses(courses.filter(course => course._id !== courseId));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting course:', error);
       
     }
@@ -95,8 +105,8 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (userId: string) => {
     try {
       await axios.delete(`http://localhost:3000/users/${userId}`, { withCredentials: true });
-      setUsers(users.filter(user => user._id !== userId)); // Remove the deleted user from the list
-    } catch (error: any) {
+    //  setUsers(users.filter(user => user._id !== userId)); // Remove the deleted user from the list
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
     }
   };

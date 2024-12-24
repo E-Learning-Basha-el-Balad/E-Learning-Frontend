@@ -7,7 +7,7 @@ import {Module} from "../types/Module";
 
 const InstructorDetailsPage = ({ course }: { course: Course }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+ // const [error, setError] = useState<string | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [red, setRed] = useState<boolean | null>(null);
@@ -24,9 +24,10 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
           { withCredentials: true }
         );
         setModules(response.data);
-      } catch (err: any) {
-        console.error(err.response?.data || err.message);
-        setError("Failed to fetch modules.");
+      } catch (err: unknown) {
+        if(err instanceof Error)
+          console.error(err.message);
+      //  setError("Failed to fetch modules.");
       } finally {
         setLoading(false);
       }
@@ -51,7 +52,7 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this course?")) {
       setLoading(true);
-      setError(null);
+     // setError(null);
       setMessage(null);
 
       try {
@@ -68,10 +69,11 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
           setMessage("Failed to delete the course.");
           setRed(true);
         }
-      } catch (error: any) {
-        console.error(error.response.message)
-        setError(error.response?.data || "An error occurred.");
-        console.error("Error deleting course:", error.message);
+      } catch (error: unknown) {
+        if(error instanceof Error)
+          console.error(error.message)
+     //   setError(error.response?.data || "An error occurred.");
+      //  console.error("Error deleting course:", error.message);
         setMessage("An error occurred while deleting the course.");
         setRed(true);
       } finally {
@@ -97,9 +99,10 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
         setMessage(`Invitation sent to ${email}.`);
         setRed(false);
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || "An error occurred.");
-      setMessage(error.response?.data?.message || "An error occurred.");
+    } catch (error: unknown) {
+    //  setError(error.response?.data?.message || "An error occurred.");
+      if(error instanceof Error)
+        setMessage(error.message || "An error occurred.");
       setRed(true);
     } finally {
       if (e.currentTarget) {  // Add null check

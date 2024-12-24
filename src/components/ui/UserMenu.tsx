@@ -21,7 +21,7 @@ const UserMenu: React.FC<userMenuProps> = ({name , role }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
+      await axios.post('http://localhost:4000/auth/logout', {}, { withCredentials: true });
       window.location.href = '/'; 
     } catch (error) {
       console.error('Logout failed:', error);
@@ -56,8 +56,8 @@ const UserMenu: React.FC<userMenuProps> = ({name , role }) => {
        
 
         <h3>Welcome {name}</h3>
-        <Dropdown.Item onClick={handleDashboard}>Dashboard</Dropdown.Item>
-        <Dropdown.Item onClick={handleLogout}>Log Out</Dropdown.Item>
+        {role!='Guest' && <Dropdown.Item onClick={handleDashboard}>Dashboard</Dropdown.Item>}
+        {role!='Guest' && <Dropdown.Item onClick={handleLogout}>Log Out</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );

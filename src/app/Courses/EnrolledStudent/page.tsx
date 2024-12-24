@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Course } from "../../types/Course"; // Assuming you have a Course type
-import CourseDetailsPage from "../Details/page";
+import CourseDetailsPage from "../Details/course.details";
 
 const EnrolledCoursesPage = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [studentId, setStudentId] = useState<string>('');
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<Course | null>(null);
 
   useEffect(() => {
     const fetchEnrolledCourses = async () => {
@@ -23,7 +23,7 @@ const EnrolledCoursesPage = () => {
             setError('No courses found for this student.');
           }
           setLoading(false);
-        } catch (err) {
+        } catch{
           setError('Failed to fetch enrolled courses. Please check the backend or try again later.');
           setLoading(false);
         }
@@ -32,7 +32,7 @@ const EnrolledCoursesPage = () => {
     fetchEnrolledCourses();
   }, [studentId]);
 
-  const handleCardClick = (courseId: string) => {
+  const handleCardClick = (courseId: Course) => {
     setSelectedCourseId(courseId);
   };
 
@@ -46,7 +46,7 @@ const EnrolledCoursesPage = () => {
           >
             &larr; Back to Enrolled Courses
           </button>
-          <CourseDetailsPage courseIdInput={selectedCourseId} />
+          <CourseDetailsPage course={selectedCourseId} />
         </div>
       ) : (
         <>
@@ -72,7 +72,7 @@ const EnrolledCoursesPage = () => {
               {courses.map((course) => (
                 <div
                   key={course._id}
-                  onClick={() => handleCardClick(course._id)}
+                  onClick={() => handleCardClick(course)}
                   className="bg-white rounded-lg shadow-md overflow-hidden transform transition-transform hover:scale-105 cursor-pointer"
                 >
                   <div className="h-40 bg-gray-200 flex items-center justify-center">

@@ -12,7 +12,7 @@ const api: AxiosInstance = axios.create({
 export const fetchData = async <T>(
   endpoint: string, 
   method: string, 
-  data: any
+  data: unknown
 ): Promise<T> => {
   try {
     const response = await api.request<T>({
@@ -24,7 +24,7 @@ export const fetchData = async <T>(
       }
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error:', error);
     throw error;
   }

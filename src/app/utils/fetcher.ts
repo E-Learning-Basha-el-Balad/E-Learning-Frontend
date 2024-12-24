@@ -1,12 +1,12 @@
 // utils/fetcher.ts'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+//const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-interface FetcherOptions extends RequestInit {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  body?: any; // Use `any` for flexibility; prefer `unknown` for strict typing
-  token?: string; // Optional authorization token
-}
+// interface FetcherOptions extends RequestInit {
+//   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+//   body?: any; // Use `any` for flexibility; prefer `unknown` for strict typing
+//   token?: string; // Optional authorization token
+// }
 
 const fetcher = async (url: string, options = {}) => {
   try {
@@ -25,9 +25,11 @@ const fetcher = async (url: string, options = {}) => {
     } else {
       throw new Error('Empty response body');
     }
-  } catch (error: any) {
-    console.error(`Error fetching ${url}:`, error.message);
-    throw new Error(error.message || 'An unknown error occurred');
+  } catch (error: unknown) {
+    if(error instanceof Error){
+      console.error(`Error fetching ${url}:`, error.message);
+      throw new Error(error.message || 'An unknown error occurred');
+    }
   }
 };
 

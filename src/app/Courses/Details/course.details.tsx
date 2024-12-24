@@ -5,10 +5,10 @@ import { Module } from "@/app/types/Module";
 import axios from "axios";
 import Accordion from "@/components/ui/Accordion";
 
-const CourseDetailsPage = ({ course }: { course: Course | null }) => {
+export default function CourseDetailsPage({ course }: { course: Course }){
   // State for the course details
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  //const [loading, setLoading] = useState(false);
+  //const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [red, setRed] = useState<boolean | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
@@ -19,17 +19,18 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
       if (!course?._id) return;
 
       try {
-        setLoading(true);
+       // setLoading(true);
         const response = await axios.get(
-          `http://localhost:3000/courses/${course._id}/modules`,
+          `http://localhost:3000/courses/${course?._id}/modules`,
           { withCredentials: true }
         );
         setModules(response.data);
-      } catch (err: any) {
-        console.error(err.response?.data || err.message);
-        setError("Failed to fetch modules.");
+      } catch (err: unknown) {
+        if(err instanceof Error)
+          console.error(err.message);
+   //     setError("Failed to fetch modules.");
       } finally {
-        setLoading(false);
+        //setLoading(false);
       }
     };
 
@@ -56,28 +57,28 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
         setMessage("Enrolled Successfully");
         setRed(false);
       }
-    } catch (error: any) {
-      if (error.response && error.response.status === 400) {
-        setMessage("Error while enrolling");
-        setRed(true);
-      }
-      if (error.response && error.response.status === 409) {
-        setMessage("Already Enrolled");
-        setRed(true);
-      }
+    } catch (error : unknown) {
+      // if (error.response && error.response.status === 400) {
+      //   setMessage("Error while enrolling");
+      //   setRed(true);
+      // }
+      // if (error.response && error.response.status === 409) {
+      //   setMessage("Already Enrolled");
+      //   setRed(true);
+      // }
 
-      if (error.response && error.response.status === 403) {
-        setMessage("This User can't enroll in courses");
+      // if (error.response && error.response.status === 403) {
+      //   setMessage("This User can't enroll in courses");
+      //   setRed(true);
+      // }
+      // if (error.response && error.response.status === 401) {
+      //   setMessage("Please login or sign up to enroll in courses");
+      //   setRed(true);
+      // }
+      if(error instanceof Error){
+        setMessage(error.message);
         setRed(true);
       }
-      if (error.response && error.response.status === 401) {
-        setMessage("Please login or sign up to enroll in courses");
-        setRed(true);
-      }
-
-      
-     
-      
     }
   };
 
@@ -94,31 +95,31 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
             {/* Course Info Section */}
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Description:</div>
-              <div className="col-md-8">{course.description || "N/A"}</div>
+              <div className="col-md-8">{course?.description || "N/A"}</div>
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Category:</div>
-              <div className="col-md-8">{course.category}</div>
+              <div className="col-md-8">{course?.category}</div>
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Level:</div>
-              <div className="col-md-8">{course.level}</div>
+              <div className="col-md-8">{course?.level}</div>
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Instructor:</div>
               <div className="col-md-8">
-                {course.instructor_details[0]?.name || "Unassigned"}
+                {course?.instructor_details[0]?.name || "Unassigned"}
               </div>
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Version:</div>
-              <div className="col-md-8">{course.versionNumber}</div>
+              <div className="col-md-8">{course?.versionNumber}</div>
             </div>
             <div className="row mb-4 w-100">
               <div className="col-md-4 font-weight-bold text-black">Keywords:</div>
               <div className="col-md-8">
                 <ul>
-                  {course.keywords.map((keyword, index) => (
+                  {course?.keywords.map((keyword, index) => (
                     <li key={index}>{keyword}</li>
                   ))}
                 </ul>
@@ -169,4 +170,4 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
   );
 };
 
-export default CourseDetailsPage;
+//export default CourseDetailsPage;

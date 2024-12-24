@@ -23,7 +23,7 @@ const LogsPage = () => {
         const response = await axios.get('http://localhost:3000/logs', { withCredentials: true });
         setLogs(response.data);
         setLoading(false);
-      } catch (error: any) {
+      } catch{
         setError('Failed to fetch logs');
         setLoading(false);
       }

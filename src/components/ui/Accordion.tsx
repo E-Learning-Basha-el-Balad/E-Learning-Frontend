@@ -16,6 +16,10 @@ const Accordion: React.FC<AccordionProps> = ({ modules,isGuest,isInstructor }) =
     if (fileExtension === 'pdf') {
       return <embed src={fileUrl} width="100%" height="600px" type="application/pdf" />;
     }
+
+    if(isInstructor){
+      console.log("Ya rab er7amny");
+    }
     
     if (fileExtension === 'mp4') {
       return (

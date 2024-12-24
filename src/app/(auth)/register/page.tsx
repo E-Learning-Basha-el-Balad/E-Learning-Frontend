@@ -1,6 +1,6 @@
 'use client'
 import React from "react";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -36,10 +36,8 @@ const RegisterPage = () => {
       } else {
         setMessage("Registration Failed");
       }
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setMessage(err.response.data.message);
-      } else {
+    } catch (err: unknown) {
+      if(err instanceof Error){
         setMessage(err.message);
       }
     }

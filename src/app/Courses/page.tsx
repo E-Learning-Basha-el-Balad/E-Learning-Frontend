@@ -2,20 +2,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Course } from "../types/Course";
-import CourseDetailsPage from "./Details/page";
-import { FaBookOpen } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import CourseDetailsPage from "./Details/course.details";
+//import { FaBookOpen } from "react-icons/fa";
+//import { useRouter } from "next/navigation";
 import { FaArrowLeft } from 'react-icons/fa';
 
-const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
+//const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
+const AllCoursesPage = () => {
   const [courses, setCourses] = useState<Course[]>([]); // Original course data
   const [searchcourses, setSearchcourses] = useState<Course[]>([]); // Filtered course data for search
   const [searchQuery, setSearchQuery] = useState("");
-  const [guest, setGuest] = useState<boolean>(false);
-  const [userId, setUserId] = useState<number | null>(null);
+ // const [guest, setGuest] = useState<boolean>(false);
+ // const [userId, setUserId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const router = useRouter();
+ // const router = useRouter();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -41,19 +42,14 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
         });
 
         if (response.status === 200) {
-          const new_user = response.data;
-          setUserId(new_user._id);
-          setGuest(false);
+      //    const new_user = response.data;
+         // setUserId(new_user._id);
+         // setGuest(false);
         }
-      } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          setGuest(true);
-          return;
+      } catch (error: unknown) {
+        if(error instanceof Error){
+          console.log(error.message);
         }
-        console.error(
-          "Error fetching user data:",
-          error.response?.data || error.message
-        );
       }
     };
 
@@ -64,7 +60,7 @@ const AllCoursesPage = ({ isGuest }: { isGuest: boolean }) => {
         );
         setCourses(response.data);
         setSearchcourses(response.data); // Initialize with all courses
-      } catch (err) {
+      } catch{
         setError("Failed to fetch courses. Please try again later.");
       }
     };

@@ -1,13 +1,13 @@
 'use client';
-import { useState } from "react";
+//import { useState } from "react";
 import { Course } from "../types/Course";
-import axios from "axios";
+//import axios from "axios";
 
 const StudentDetailsPage = ({ course }: { course: Course }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [red, setRed] = useState<boolean | null>(null);
+  //const [loading, setLoading] = useState(false);
+ // const [error, setError] = useState<string | null>(null);
+ // const [message, setMessage] = useState<string | null>(null);
+ // const [red, setRed] = useState<boolean | null>(null);
 
   return (
     <div className="container py-5">
@@ -81,14 +81,14 @@ const StudentDetailsPage = ({ course }: { course: Course }) => {
           </div>
 
           {/* Message Box */}
-          {message && (
+          {/* {message && (
             <div
               className={`alert ${red ? "alert-danger" : "alert-success"} mt-4`}
               role="alert"
             >
               {message}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

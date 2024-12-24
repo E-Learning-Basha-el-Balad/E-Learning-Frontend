@@ -40,8 +40,9 @@ const EnrollStudentsPage = () => {
         setStudentId(""); // Clear the input field
         setInstructorId(""); // Clear the input field
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || "Failed to enroll student.");
+    } catch (err: unknown) {
+      if(err instanceof Error)
+        setErrorMessage(err.message || "Failed to enroll student.");
     } finally {
       setLoading(false);
     }

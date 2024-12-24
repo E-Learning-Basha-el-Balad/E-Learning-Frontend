@@ -56,11 +56,13 @@ const Dashboard = () => {
         if (response.status === 200) {
           setUser(response.data);
         }
-      } catch (error: any) {
-        if (error.response?.status === 401) {
-          return;
-        }
-        console.error('Error fetching user data:', error.response?.data || error.message);
+      } catch (error: unknown) {
+        if(error instanceof Error)
+          console.log(error.message);
+        // if (error.response?.status === 401) {
+        //   return;
+        // }
+        // console.error('Error fetching user data:', error.response?.data || error.message);
       }
     };
 

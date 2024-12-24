@@ -1,9 +1,9 @@
 "use client";
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+//import { useRouter } from 'next/navigation';
 
 const DeleteCoursePage = () => {
-  const router = useRouter();
+  //const router = useRouter();
   const [courseId, setCourseId] = useState('');
   const [instructorId, setInstructorId] = useState('');
   const [message, setMessage] = useState('');
@@ -30,7 +30,7 @@ const DeleteCoursePage = () => {
         setError(data.message || 'Failed to delete the course.');
         setMessage('');
       }
-    } catch (err) {
+    } catch{
       setError('An error occurred while deleting the course.');
       setMessage('');
     }
