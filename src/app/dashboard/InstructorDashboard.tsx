@@ -5,46 +5,166 @@ import { Types } from 'mongoose';
 import { Course } from "../types/Course";
 import InstructorDetailsPage from "./InstructorCourseDetails";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
+import { Student } from "../types/student";
+import {Instructor} from "../types/Course"
 
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  gpa: number;
-  enrolledCourses: Types.ObjectId[];
-  createdCourses: Types.ObjectId[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
+import { Module } from "../types/Module";
+const ISDP = ({ student }: { student: Student }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [red, setRed] = useState<boolean | null>(null);
 
-interface Student {
-  _id: string;
-  name: string;
-  email: string;
-  gpa: number;
-  enrolledCourses: Types.ObjectId[];
-  createdAt: string;
-}
+  return (
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ height: "80vh", width: "80vh" }}
+    >
+      <div className="card w-100" style={{ minWidth: "500px", minHeight: "400px" }}>
+        <div className="card-body">
+          <h6 className="card-subtitle mb-2 text-muted text-center">Student Details</h6>
+          <p className="card-text">
+            <strong>Name:</strong> {student.name}
+          </p>
+          <p className="card-text">
+            <strong>Email:</strong> {student.email}
+          </p>
+          <p className="card-text">
+            <strong>GPA:</strong> {student.gpa}
+          </p>
+
+          {student.courses && student.courses.length > 0 ? (
+            <div>
+              <h6 className="mt-4">Enrolled Courses:</h6>
+              <ul className="list-group mt-2">
+                {student.courses.map((course, index) => (
+                  <li className="list-group-item" key={index}>
+                    <strong>{course.title}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-muted mt-4">No courses enrolled.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const IDP = ({ instructor }: { instructor: Instructor | null }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [red, setRed] = useState<boolean | null>(null);
+
+  // State to manage whether the name input is editable or not
+  const [isEditable, setIsEditable] = useState(false);
+  const [name, setName] = useState(instructor?.name || ''); // Local state for name
+
+  // Function to toggle the name input between read-only and editable
+  const handleEditClick = async () => {
+    setIsEditable(!isEditable);
+    if (isEditable) {
+      try {
+        const response = await axios.put(
+          "http://localhost:3000/users/editname", 
+          { name: name },  
+          { withCredentials: true }
+        );
+        setMessage("Name Updated");
+        setRed(false); 
+      } catch (error: any) {
+        setMessage(error.response?.data?.message || "Error updating name");
+        setRed(true); 
+      }
+    }
+  };
+
+  // Handle name change when input is edited
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value);
+  };
+
+  return (
+    <div
+      className="d-flex justify-content-end align-items-center"
+      style={{ height: '80vh', width: '45vw' }}
+    >
+      <div className="card" style={{ minWidth: '300px', minHeight: '100px' }}>
+        <div className="card-body">
+          <h6 className="card-subtitle mb-2 text-muted text-center">Instructor Details</h6>
+
+          <div>
+            <strong>Name:</strong>
+            <input
+              className="form-control"
+              type="text"
+              value={name} // Bind the local state to the input value
+              onChange={handleNameChange} // Update the name state on change
+              placeholder="Edit name here..."
+              readOnly={!isEditable} // Make it editable only when isEditable is true
+            />
+
+            <strong>Email:</strong>
+            <div>{instructor?.email}</div> {/* Display email without editing option */}
+          </div>
+
+          {/* Edit button */}
+          <div className="text-center mt-3">
+            <button
+              className="btn btn-primary"
+              onClick={handleEditClick} // Toggle the editable state
+            >
+              {isEditable ? 'Save Info' : 'Edit Info'} {/* Change button text based on isEditable */}
+            </button>
+          </div>
+
+          {/* Alert box for message */}
+          {message && (
+            <div
+              className={`alert mt-3 ${red ? 'alert-danger' : 'alert-success'}`}
+              role="alert"
+            >
+              {message}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState<'courses' | 'performance' | 'chat' | 'forms' | 'students'>('courses');
-  const [userData, setUserData] = useState<User | null>(null);
+  const [activeTab, setActiveTab] = useState<  'user info' | 'courses' | 'performance' | 'chat' | 'forms' | 'students'>('courses');
+  const [userData, setUserData] = useState<Instructor | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
+  const [searchStudents, setSearchStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
 
   const handleCardClick = (course: Course) => setSelectedCourse(course);
 
-  const handleButtonClick = (tab: 'courses' | 'performance' | 'chat' | 'forms' | 'students') => {
+  const handleStudentCardClick = (student: Student) => setSelectedStudent(student);
+
+
+  const handleButtonClick = (tab: 'user info' |  'courses' | 'performance' | 'chat' | 'forms' | 'students') => {
     setActiveTab(tab);
   };
 
-  const setUser = (newUser: User) => {
+  const setUser = (newUser: Instructor) => {
     setUserData(newUser);
   };
 
@@ -75,8 +195,9 @@ const Dashboard = () => {
 
     const fetchStudents = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/students", { withCredentials: true });
+        const response = await axios.get("http://localhost:3000/users/students", { withCredentials: true });
         setStudents(response.data);
+        setSearchStudents(response.data)
       } catch (err) {
         console.error('Failed to fetch students', err);
       }
@@ -91,14 +212,25 @@ const Dashboard = () => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = courses.filter(
-      (course) =>
-        course.title.toLowerCase().includes(query) ||
-        course.description.toLowerCase().includes(query) ||
-        course.keywords.some((keyword) => keyword.toLowerCase().includes(query))
-    );
+    if (activeTab === 'courses') {
+      const filteredCourses = courses.filter(
+        (course) =>
+          course.title.toLowerCase().includes(query) ||
+          course.description.toLowerCase().includes(query) ||
+          course.keywords.some((keyword) => keyword.toLowerCase().includes(query))
+      );
+      setSearchCourses(filteredCourses);
 
-    setSearchCourses(filtered);
+      
+
+
+    } else if (activeTab === 'students') {
+      const filteredStudents = students.filter(
+        (student) =>
+          student.name.toLowerCase().includes(query)
+      );
+      setSearchStudents(filteredStudents);
+    }
   };
 
   return (
@@ -242,7 +374,7 @@ const Dashboard = () => {
           font-size: 12px;
           color: #777;
         }
-
+        
         .search-input {
           margin-bottom: 20px;
           padding: 10px;
@@ -295,6 +427,17 @@ const Dashboard = () => {
           font-size: 14px;
           color: #777;
         }
+        .create-course-btn {
+          padding: 10px 16px;
+          font-size: 16px;
+          font-family: 'CustomFont2', sans-serif;
+          color: white;
+          background-color: #31087b;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background-color 0.3s ease, transform 0.2s ease;
+        }
       `}</style>
       <div className="sidebar">
         
@@ -312,6 +455,15 @@ const Dashboard = () => {
           </div>
         )}
         <div className="nav flex-column">
+        <div className="nav-item">
+            <button
+              onClick={() => handleButtonClick('user info')}
+              className={activeTab === 'user info' ? 'active' : ''}
+            >
+              User info
+            </button>
+          </div>
+
           <div className="nav-item">
             <button
               onClick={() => handleButtonClick('courses')}
@@ -370,35 +522,91 @@ const Dashboard = () => {
       ) : (
         <div className="content">
           {activeTab === 'courses' && (
-            <>
-              <input
-                type="text"
-                className="search-input"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search courses..."
-              />
-              <div className="course-container">
-                {searchCourses.map((course) => (
-                  <div key={course._id} onClick={() => handleCardClick(course)} className="course-card">
-                    <div className="course-title">{course.title}</div>
-                    <div className="course-version">Version: {course.versionNumber}</div>
-                  </div>
-                ))}
-              </div>
-            </>
+           <>
+           <input
+             type="text"
+             className="search-input"
+             value={searchQuery}
+             onChange={handleSearchChange}
+             placeholder="Search courses..."
+           />
+           <button
+             onClick={() => window.location.href = '/Courses/Create'}
+             className="create-course-btn ml-4"
+           >
+             Create Course
+           </button>
+           <div className="course-container">
+             {searchCourses.map((course) => (
+               <div key={course._id} onClick={() => handleCardClick(course)} className="course-card">
+                 <div className="course-title">{course.title}</div>
+                 <div className="course-version">Version: {course.versionNumber}</div>
+               </div>
+             ))}
+           </div>
+         </>
           )}
+
+
+{activeTab === 'user info' && (
+  <>
+    <div className="back-button-container">
+      <button
+       onClick={() => handleButtonClick('courses')}  // Assuming setSelectedStudent is used to clear the selected student
+        className="flex items-center text-indigo-600 hover:text-indigo-800 space-x-2 transition-colors duration-300 bg-white px-4 py-2 rounded-lg shadow-md"
+      >
+        <FaArrowLeft className="mr-2" />
+        <span>Back to Dashboard</span>
+      </button>
+    </div>
+
+    {/* Your component for user info */}
+    <IDP instructor={userData} />
+  </>
+)}
+          
           {activeTab === 'students' && (
-            <div className="student-container">
-              {students.map((student) => (
-                <div key={student._id} className="student-card">
-                  <div className="student-name">{student.name}</div>
-                  <div className="student-email">{student.email}</div>
-                  <div className="student-gpa">GPA: {student.gpa}</div>
-                </div>
-              ))}
+  <>
+    {selectedStudent ? (
+      <div className="details-container">
+        <div className="back-button-container">
+          <button
+            onClick={() => setSelectedStudent(null)}
+            className="flex items-center text-indigo-600 hover:text-indigo-800 space-x-2 transition-colors duration-300 bg-white px-4 py-2 rounded-lg shadow-md"
+          >
+            <FaArrowLeft className="mr-2" />
+            <span>Back to All Students</span>
+          </button>
+        </div>
+        <ISDP student={selectedStudent} />
+      </div>
+    ) : (
+      <>
+        <input
+          type="text"
+          className="search-input"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search students..."
+        />
+        <div className="student-container">
+          {searchStudents.map((student) => (
+            <div
+              key={student._id}
+              onClick={() => handleStudentCardClick(student)}
+              className="student-card"
+            >
+              <div className="student-name">{student.name}</div>
+              <div className="student-email">{student.email}</div>
+              <div className="student-gpa">GPA: {student.gpa}</div>
             </div>
-          )}
+          ))}
+        </div>
+      </>
+    )}
+  </>
+)}
+          
           {activeTab === 'chat' && <div>Chat content goes here</div>}
         </div>
       )}
