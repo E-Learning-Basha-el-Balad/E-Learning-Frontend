@@ -41,8 +41,6 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
    
     
     try {
-      console.error("ENTERED")
-      console.error(course?._id);
       const response = await axios.post(
         "http://localhost:3000/courses/enroll",
         {courseId: course?._id,},
@@ -50,8 +48,6 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
       );
       console.error(course?._id);
 
-
-      console.error("ENTERED2")
       if (response.status == 201) {
         setMessage("Enrolled Successfully");
         setRed(false);
@@ -129,7 +125,7 @@ const CourseDetailsPage = ({ course }: { course: Course | null }) => {
                   <br></br>
             {/* Modules Section */}
             <div className="row w-100">
-              <Accordion modules={modules} isGuest={false} isInstructor={false}/>
+              <Accordion modules={modules} isGuest={true} isInstructor={false} isStudent={false}/>
             </div>
 
             {/* Centered and Styled Enroll Button */}

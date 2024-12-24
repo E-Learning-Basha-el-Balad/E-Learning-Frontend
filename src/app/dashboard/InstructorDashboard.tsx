@@ -211,6 +211,7 @@ const Dashboard = () => {
     const fetchStudents = async () => {
       try {
         const response = await axios.get("http://localhost:3000/users/students", { withCredentials: true });
+        console.log(response.data)
         setStudents(response.data);
         setSearchStudents(response.data)
       } catch (err) {

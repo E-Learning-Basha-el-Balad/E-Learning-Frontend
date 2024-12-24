@@ -100,8 +100,11 @@ const NavBar: React.FC<NavBarProps> = ({ role , name }) =>  {
           <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div className="navbar-nav">
               <a className="nav-link active" aria-current="page" href="#" style={{ fontFamily: 'CustomFont2' }}>Home</a>
-              <a className="nav-link" href="#" style={{ fontFamily: 'CustomFont2' }}>Courses</a>
+              <a className="nav-link" href="/Courses" style={{ fontFamily: 'CustomFont2' }}>Courses</a>
+              <a className="nav-link" href="/Instructors" style={{ fontFamily: 'CustomFont2' }}>Instructors</a>
             </div>
+          </div>
+           <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
           </div>
           <div className="navbar-nav ms-auto"> {/* Align to the right */}
            { role=='guest' && <button  className="btn rounded-pill" onClick={loginRoute} type="button" style={{ fontFamily: 'CustomFont2' }}>Login</button>}

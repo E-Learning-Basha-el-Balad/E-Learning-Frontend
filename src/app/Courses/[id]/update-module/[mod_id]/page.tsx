@@ -20,7 +20,9 @@ const UpdateModulePage = () => {
   useEffect(() => {
     const fetchModuleData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/courses/${courseId}/modules/${moduleId}`);
+        const response = await axios.get(`http://localhost:3000/courses/${courseId}/modules/${moduleId}`,{
+          withCredentials:true
+        });
         console.log(response.data)
         setModuleData(response.data);
       } catch (error) {

@@ -70,7 +70,6 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
   const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = e.currentTarget.email.value;
-    console.error(email);
   
     try {
       const response = await axios.post(
@@ -239,12 +238,6 @@ const InstructorDetailsPage = ({ course }: { course: Course }) => {
                 disabled={loading}
               >
                 {loading ? "Deleting..." : "Delete Course"}
-              </button>
-              <button
-                className="btn btn-info"
-                onClick={() => window.location.href = `/Courses/${course._id}/notes`}
-              >
-                Notes
               </button>
             </div>
           </div>

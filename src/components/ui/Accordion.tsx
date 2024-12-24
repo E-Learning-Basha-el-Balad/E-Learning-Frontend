@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Module } from "../../app/types/Module";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { isSetIterator } from "util/types";
 
 type AccordionProps = {
   modules: Module[];
@@ -133,6 +134,30 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
     }
   };
 
+  const toggleOutdated = async (moduleId: string, course_id: string, outdatedStatus: boolean) => {
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/courses/${course_id}/modules/${moduleId}/flag`,
+        { "flag": !outdatedStatus },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const updatedModules = modules.map((module) =>
+          module._id === moduleId ? { ...module, outdated: !outdatedStatus } : module
+        );
+        // Update the modules state with the new outdated status
+        // Assuming you have a state to manage `modules` in the parent component
+      }
+    } catch (error) {
+      console.error("Error updating outdated status", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchNotesForModule = async (moduleId: string) => {
       try {
@@ -153,6 +178,8 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
     };
 
     const fetchAllNotes = async () => {
+      if (!isStudent) return;
+      
       setLoading(true);
       setError(null);
       
@@ -167,32 +194,7 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
     };
 
     fetchAllNotes();
-  }, [modules]);
-
-  const toggleOutdated = async (moduleId: string,course_id:string, outdatedStatus: boolean) => {
-    setLoading(true);
-
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/courses/${course_id}/modules/${moduleId}/flag`, 
-        { "flag": !outdatedStatus },
-        { withCredentials: true }
-      );
-
-      if (response.status === 200) {
-        const updatedModules = modules.map((module) =>
-          module._id === moduleId ? { ...module, outdated: !outdatedStatus } : module
-        );
-        // Update the modules state with the new outdated status
-        // Assuming you have a state to manage `modules` in the parent component
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Error updating outdated status", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [modules, isStudent]);
 
   return (
     <div className="accordion accordion-flush" id="accordionFlushExample">
@@ -207,7 +209,7 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
               aria-expanded="false"
               aria-controls={`flush-collapse-${module._id}`}
             >
-           {module.title}
+              {module.title}
             </button>
           </h2>
           <div
@@ -221,126 +223,121 @@ const Accordion: React.FC<AccordionProps> = ({ modules, isGuest, isInstructor, i
                 <div>
                   {module.filePath.map((filePath, index) => (
                     <div key={index} className="file-item">
-                      {<div>{filePath}</div>}
+                      <div>{filePath}</div>
                       {!isGuest && renderFile(filePath)}
                     </div>
                   ))}
                 </div>
               )}
-              { isStudent &&
-              <a href={`/quizzes?moduleId=${module._id}`} className="btn btn-primary me-2">
-                <i className="bi bi-file-text me-2"></i>
-                View Quiz
-              </a>
-              }
-              {isInstructor && (
-  }
 
-              {
-                isInstructor &&
-              <a href={`/questions?moduleId=${module._id}`} className="btn btn-secondary me-2">
+              {isStudent || isInstructor && (
+                <a href={`/quizzes?moduleId=${module._id}`} className="btn btn-primary me-2">
+                  <i className="bi bi-file-text me-2"></i>
+                  View Quiz
+                </a>
+              )}
+
+              {isInstructor && (
+                <a href={`/questions?moduleId=${module._id}`} className="btn btn-secondary me-2">
                   <i className="bi bi-question-circle me-2"></i>
                   View Question Banks
                 </a>
               )}
 
-      { isStudent &&
-          <>
-              <h4>Quick Note</h4>
-              <textarea
-                className="form-control mb-2"
-                placeholder="Write a quick note..."
-                value={newNotes[module._id] || ""}
-                onChange={(e) => setNewNotes(prev => ({
-                  ...prev,
-                  [module._id]: e.target.value
-                }))}
-              />
-              <button 
-                className="btn btn-primary mb-4" 
-                onClick={() => handleQuickNoteSubmit(module._id)}
-              >
-                Save Note
-              </button>
+              {isStudent && (
+                <>
+                  <h4>Quick Note</h4>
+                  <textarea
+                    className="form-control mb-2"
+                    placeholder="Write a quick note..."
+                    value={newNotes[module._id] || ""}
+                    onChange={(e) => setNewNotes(prev => ({
+                      ...prev,
+                      [module._id]: e.target.value
+                    }))}
+                  />
+                  <button 
+                    className="btn btn-primary mb-4" 
+                    onClick={() => handleQuickNoteSubmit(module._id)}
+                  >
+                    Save Note
+                  </button>
 
-              <div>
-                <h2>Saved Notes</h2>
-                {notes[module._id]?.length > 0 ? (
-                  notes[module._id].map((note) => (
-                    <div key={note._id} className="mb-3 p-3 border rounded">
-                      {editingNote === note._id ? (
-                        <>
-                          <textarea
-                            className="form-control mb-2"
-                            value={editedContent}
-                            onChange={(e) => handleEditContentChange(e.target.value)}
-                          />
-                          <button
-                            className="btn btn-success me-2"
-                            onClick={() => handleUpdateNote(module._id, note._id)}
-                          >
-                            Save Changes
-                          </button>
-                          <button
-                            className="btn btn-secondary"
-                            onClick={() => {
-                              setEditingNote(null);
-                              setEditedContent("");
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <p>{note.content}</p>
-                          <button
-                            className="btn btn-warning me-2"
-                            onClick={() => {
-                              setEditingNote(note._id);
-                              setEditedContent(note.content);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-danger"
-                            onClick={() => handleDeleteNote(module._id, note._id)}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p>No notes available for this module</p>
-                )}
-              </div>
-              </>
-}
-}
-
-
-              {
-                isInstructor &&
-              
-              <a href={`/Courses/${module.course_id}}/update-module/${module._id}`} className="btn btn-secondary me-2">
-                <i className="bi bi-pencil-square me-2" />
-                Edit Module
-              </a>
-}
-
-              {/* Button to toggle the outdated status */}
-              {isInstructor && (
-                <button
-                  className={`btn ${module.outdated ? 'btn-danger' : 'btn-warning'}`}
-                  onClick={() => toggleOutdated(module._id,module.course_id,module.outdated)}
-                  disabled={loading}
-                >
-                  {module.outdated ? 'Outdated' : 'Set Outdated'}
-                </button>
+                  <div>
+                    <h2>Saved Notes</h2>
+                    {notes[module._id]?.length > 0 ? (
+                      notes[module._id].map((note) => (
+                        <div key={note._id} className="mb-3 p-3 border rounded">
+                          {editingNote === note._id ? (
+                            <>
+                              <textarea
+                                className="form-control mb-2"
+                                value={editedContent}
+                                onChange={(e) => handleEditContentChange(e.target.value)}
+                              />
+                              <button
+                                className="btn btn-success me-2"
+                                onClick={() => handleUpdateNote(module._id, note._id)}
+                              >
+                                Save Changes
+                              </button>
+                              <button
+                                className="btn btn-secondary"
+                                onClick={() => {
+                                  setEditingNote(null);
+                                  setEditedContent("");
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <p>{note.content}</p>
+                              <button
+                                className="btn btn-warning me-2"
+                                onClick={() => {
+                                  setEditingNote(note._id);
+                                  setEditedContent(note.content);
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="btn btn-danger"
+                                onClick={() => handleDeleteNote(module._id, note._id)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p>No notes available for this module</p>
+                    )}
+                  </div>
+                </>
               )}
+
+              {isInstructor && (
+                <>
+                  <a href={`/Courses/${module.course_id}/update-module/${module._id}`} className="btn btn-secondary me-2">
+                    <i className="bi bi-pencil-square me-2" />
+                    Edit Module
+                  </a>
+                  
+                  <button
+                    className={`btn ${module.outdated ? 'btn-danger' : 'btn-warning'}`}
+                    onClick={() => toggleOutdated(module._id, module.course_id, module.outdated)}
+                    disabled={loading}
+                  >
+                    {module.outdated ? 'Outdated' : 'Set Outdated'}
+                  </button>
+                </>
+              )}
+
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
             </div>
           </div>
         </div>
