@@ -102,9 +102,9 @@ const NavBar: React.FC<NavBarProps> = ({ role , name }) =>  {
             <div className="navbar-nav">
               <a className="nav-link active" aria-current="page" href="#" style={{ fontFamily: 'CustomFont2' }}>Home</a>
               <a className="nav-link" href="#" style={{ fontFamily: 'CustomFont2' }}>Courses</a>
-              <Link href="/Chat" className="nav-link" style={{ fontFamily: 'CustomFont2' }}>
+              {localStorage.getItem('userRole') != 'admin' && <Link href="/Chat" className="nav-link" style={{ fontFamily: 'CustomFont2' }}>
         Chat
-      </Link>
+      </Link>}
       {role == 'Guest' && <Link href="/login" className="nav-link" style={{ fontFamily: 'CustomFont2' }}>
         Login
       </Link>}

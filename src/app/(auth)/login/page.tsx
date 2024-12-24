@@ -18,10 +18,6 @@ const LoginPage = () => {
     console.log("Submit handled");
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
-    
     const response = await axios.post('http://localhost:4000/auth/login', {
       email: email,
       password: password,
