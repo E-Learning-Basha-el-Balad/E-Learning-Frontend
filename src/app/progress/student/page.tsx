@@ -1,96 +1,202 @@
 "use client"
 import { useState, useEffect } from "react";
 import axios from "axios";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import ProgressBar from "@/components/ui/ProgressBar";
 
-export default function ProgressReport() {
+export default function StudentProgressReport() {
   const [courseId, setCourseId] = useState("");
   const [studentReport, setStudentReport] = useState<any>(null);
   const [courseRatings, setCourseRatings] = useState<any[]>([]);
   const [averageScores, setAverageScores] = useState<any[]>([]);
-
-  const fetchStudentReport = (courseId: string) => {
-    axios.get(`https://localhost:3000/progress/studentEngagementReport?courseId=${courseId}`)
-      .then((response: any) => {
-        setStudentReport(response.data);
-      })
-      .catch((error: any) => {
-        console.error('Error fetching student report:', error);
-      });
-  };
-
-  const fetchCourseRatings = () => {
-    axios.get("https://localhost:3000/progress/course-rating")
-      .then((response: any) => {
-        setCourseRatings(response.data);
-      })
-      .catch((error: any) => {
-        console.error('Error fetching course ratings:', error);
-      });
-  };
-
-  const fetchAverageScores = () => {
-    axios.get("https://localhost:3000/progress/averageScore/instructor")
-      .then((response: any) => {
-        setAverageScores(response.data);
-      })
-      .catch((error: any) => {
-        console.error('Error fetching average scores:', error);
-      });
-  };
+  const [student, setStudent] = useState({ id: "", gpa:0});
+  const [courseScores, setCourseScores] = useState<{ course: string; averageScore: number }[]>([]);
+  const [averageCompletion, setAverageCompletion] = useState<number>(0);
+  const [engagementTrend, setEngagementTrend] = useState<any[]>([]);
+  const [rateeType, setRateeType] = useState("");
+  const [rating, setRating] = useState(0);
+  const [rateeId, setRateeId] = useState("");
+  const [quizScores, setQuizScores] = useState<{ 
+    quiz_id: number,
+    score: string }[]>([]);
 
   useEffect(() => {
-    fetchCourseRatings();
     fetchAverageScores();
+    fetchAverageCompletion();
+    fetchQuizScores();
   }, []);
 
+  const downloadAsPDF = async () => {
+    const element = document.getElementById("downloadable-section");
+    if (element) {
+      const canvas = await html2canvas(element);
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("download.pdf");
+    }
+  };
+  
+  const fetchAverageScores = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/progress/averageScores/student", {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      setStudent(response.data.student);
+      setCourseScores(response.data.courseScores);
+    } catch (error) {
+      console.error("Error fetching average scores:", error);
+    }
+  };
+
+  const fetchAverageCompletion = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/progress/averageCompletionPercentage", {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      setAverageCompletion(response.data);
+    } catch (error) {
+      console.error("Error fetching average completion:", error);
+    }
+  }
+
+  const fetchCourseCompletion = async (courseId: string) => {
+      try {
+        const response = await axios.get(`http://localhost:3000/progress/courseId?courseId=${courseId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+
+        const response2 = await axios.get(`http://localhost:3000/progress/engagement?courseId=${courseId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+
+        setAverageCompletion(response.data);
+        setEngagementTrend(response2.data.quizzesLeft);
+      } catch (error) {
+        console.error("Error fetching course completion:", error);
+      }
+    }
+
+  const submitRating = async (ratee: string) => {
+    try {
+      if(ratee === "instructor") {
+        const response = await axios.post("http://localhost:3000/progress/rate-instructor", 
+          JSON.stringify({courseId: rateeId, rating: rating}),
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+          }
+        );
+      } else {
+        const response = await axios.post("http://localhost:3000/progress/rate-module", 
+          JSON.stringify({moduleId: rateeId, rating: rating}),
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching average completion:", error);
+    }
+  }
+
+  const fetchQuizScores = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/responses/user/responses`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      setQuizScores(response.data);
+    } catch (error) {
+      console.error("Error fetching quiz scores:", error);
+    }
+  }
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Progress Report</h1>
+    <div id='downloadable-section'style={styles.container}>
+      <button onClick={downloadAsPDF}>Download</button>
       <div style={styles.grid}>
         <div style={styles.box}>
           <h2 style={styles.title}>Student Report</h2>
+          <div style={styles.info}>
+            <p>GPA: {student.gpa}</p>
+            <p>Scores:</p>
+            <ul>
+              {courseScores.map((course, index) => (
+                <li key={index}>
+                  {course.course}: {course.averageScore}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div style={styles.box}>
+          <h2 style={styles.title}>Course Completion</h2>
+          <ProgressBar value={averageCompletion} />
           <input
             type="text"
+            id="courseId"
             placeholder="Enter Course ID"
             style={styles.input}
-            onChange={(e) => setCourseId(e.target.value)}
+            onChange={(e) => fetchCourseCompletion((e.target as HTMLInputElement).value)}
           />
-          <button style={styles.button} onClick={() => fetchStudentReport(courseId)}>
-            Get Report
-          </button>
-          {studentReport && (
-            <div style={styles.info}>
-              <p>Number of enrolled students:</p>
-              <ul>
-                <li>Total: {studentReport["Number of enrolled students"].Total}</li>
-                <li>Below Average: {studentReport["Number of enrolled students"]["Below Average"]}</li>
-                <li>Average: {studentReport["Number of enrolled students"].Average}</li>
-                <li>Above Average: {studentReport["Number of enrolled students"]["Above Average"]}</li>
-              </ul>
-              <p>Number of students who completed the course: {studentReport["Number of students who completed the course"]}</p>
-              <p>Average Score: {studentReport["Average Score"]}</p>
+          <p style={styles.info}>Modules left: {engagementTrend}</p>
+        </div>
+        <div style={styles.box}>
+          <h2 style={styles.title}>Rating</h2>
+          <button style={styles.button} onClick={() => setRateeType("instructor")}>Rate Instructor</button>
+          <button style={styles.button} onClick={() => setRateeType("module")}>Rate Module</button>
+          {rateeType === "instructor" && (
+            <div>
+              <input type="text" placeholder="Enter Instructor ID" style={styles.input} onChange={(e) => setRateeId((e.target as HTMLInputElement).value)} />
+              <input type="number" placeholder="Enter Rating" style={styles.input} onChange={(e) => setRating(Number((e.target as HTMLInputElement).value))}/>
+              <button style={styles.button} onClick={() => submitRating(rateeType)}>Submit</button>
             </div>
           )}
+          {rateeType === "module" && (
+            <div>
+              <input type="text" placeholder="Enter Module ID" style={styles.input} onChange={(e) => setRateeId((e.target as HTMLInputElement).value)} />
+              <input type="number" placeholder="Enter Rating" style={styles.input} onChange={(e) => setRating(Number((e.target as HTMLInputElement).value))}/>
+              <button style={styles.button} onClick={() => submitRating(rateeType)}>Submit</button>
+            </div>
+          )}
+
         </div>
         <div style={styles.box}>
-          <h2 style={styles.title}>Course Ratings</h2>
-          <ul>
-            {courseRatings.map((rating) => (
-              <li key={rating.course_id}>
-                {rating.course_title}: {rating.averageRating}
+         <h2 style={styles.title}>Quiz Scores</h2>
+         <ul>
+            {quizScores.map((quiz: { quiz_id: number; score: string }, index: number) => (
+                <li key={index}>
+                <p>Quiz ID: {quiz.quiz_id}</p>
+                <p>Score: {quiz.score}</p>
               </li>
             ))}
-          </ul>
-        </div>
-        <div style={styles.box}>
-          <h2 style={styles.title}>Average Scores</h2>
-          <ul>
-            {averageScores.map((score) => (
-              <li key={score.course}>
-                {score.course}: {score.avg}
-              </li>
-            ))}
-          </ul>
+         </ul>
         </div>
       </div>
     </div>
@@ -143,3 +249,5 @@ const styles = {
     textAlign: "left" as "left",
   },
 };
+// Removed the incorrect html2canvas function implementation
+
