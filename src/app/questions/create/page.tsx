@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Cookies from 'js-cookie';
 
-const CreateQuestionPage = () => {
+export default function CreateQuestionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const moduleId = searchParams.get('moduleId');
+  const [moduleTitle, setModuleTitle] = useState<string>('');
 
   const initialFormState = {
     type: 'MCQ',
@@ -30,6 +32,28 @@ const CreateQuestionPage = () => {
     }
   }, [moduleId]);
 
+  useEffect(() => {
+    const fetchModuleTitle = async () => {
+      if (!moduleId) return;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/courses/any/modules/${moduleId}`, {
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch module details');
+        const moduleData = await response.json();
+        setModuleTitle(moduleData.title);
+      } catch (err) {
+        console.error('Error fetching module title:', err);
+        setModuleTitle('Unknown Module');
+      }
+    };
+
+    fetchModuleTitle();
+  }, [moduleId]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -50,16 +74,18 @@ const CreateQuestionPage = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
+    const token = Cookies.get('jwt');
     fetch(`http://localhost:3000/question-bank`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify(formData),
     })
       .then((response) => {
         if (!response.ok) {
+          
           return response.json().then((errorData) => {
             throw new Error(errorData.message || 'Failed to create question');
           });
@@ -189,18 +215,19 @@ const CreateQuestionPage = () => {
                   </select>
                 </div>
 
-                {/* Module ID */}
+                {/* Module */}
                 <div className="mb-4">
-                  <label className="form-label fw-bold">Module ID</label>
+                  <label className="form-label fw-bold">Module</label>
                   <input
                     type="text"
-                    name="module_id"
-                    value={formData.module_id}
-                    onChange={handleChange}
+                    value={moduleTitle}
                     className="form-control form-control-lg"
-                    placeholder="Enter module ID"
-                    required
-                    readOnly={!!moduleId}
+                    disabled
+                  />
+                  <input
+                    type="hidden"
+                    name="module_id"
+                    value={moduleId || ''}
                   />
                 </div>
 
@@ -226,6 +253,4 @@ const CreateQuestionPage = () => {
       </div>
     </main>
   );
-};
-
-export default CreateQuestionPage;
+}

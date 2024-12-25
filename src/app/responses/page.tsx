@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function StudentQuizzesPage() {
   const [quizzes, setQuizzes] = useState<any[]>([]);
@@ -17,9 +18,11 @@ export default function StudentQuizzesPage() {
       setError(null);
 
       try {
+        const token = Cookies.get('jwt');
         const response = await fetch(`http://localhost:3000/quizzes`, {
           cache: 'no-store',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
         });
         if (!response.ok) throw new Error('Failed to fetch quizzes');
         const data = await response.json();
@@ -32,7 +35,7 @@ export default function StudentQuizzesPage() {
         }, {});
         setUserIds(initialUserIds);
       } catch (err) {
-        setError('Failed to load quizzes');
+        setError('Failed to load quizzes  or you are not authorized to access this page');
       } finally {
         setLoading(false);
       }
