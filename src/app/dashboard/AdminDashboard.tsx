@@ -50,10 +50,13 @@ const AdminDashboard = () => {
   const handleButtonClick = (tab: 'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'deleteUser' | 'deleteCourse' | 'logs') => {
       setActiveTab(tab);
     };
-  const handleForumClick = (course: Course) => {
-    setSelectedForumCourse(course);
-    setActiveTab('forums');
-  };
+
+
+
+  // const handleForumClick = (course: Course) => {
+  //   setSelectedForumCourse(course);
+  //   setActiveTab('forums');
+  // };
   const setUser = (newUser: User) => {
     setUserData(newUser);
   };
