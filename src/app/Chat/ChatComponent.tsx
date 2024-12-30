@@ -1,22 +1,31 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 
-const Chat = () => {
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
-  const [chatId, setChatId] = useState(null); // Replace with the actual chat ID
-  const [groupName, setGroupName] = useState('');
-  const [groupUsers, setGroupUsers] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [myChats, setMyChats] = useState([]);
-  const [emptyChats, setMyEmptyChats] = useState([]);
-  const [error, setError] = useState('');
-  const [messagesMap, setMessagesMap] = useState({});
+
+const Chat = ({ userId }: { userId: string }) => {
+
+  
+  
+  const [socket, setSocket] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [messageInput, setMessageInput] = useState<string>('');
+  const [chatId, setChatId] = useState<any>(null);
+  const [groupName, setGroupName] = useState<string>('');
+  const [groupUsers, setGroupUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [myChats, setMyChats] = useState<any[]>([]);
+  const [emptyChats, setMyEmptyChats] = useState<any[]>([]);
+  const [error, setError] = useState<any>(null);
+  const [messagesMap, setMessagesMap] = useState<any>({});
+
   // Connect to WebSocket server
   useEffect(() => {
-    const newSocket = io('http://localhost:3002'); // Adjust to your backend's WebSocket server URL
+    const newSocket = io('http://localhost:3000', {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+    })
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
@@ -25,20 +34,20 @@ const Chat = () => {
 
   useEffect(() => {
     const getMyChats = () => {
-      if(socket && localStorage.getItem('userId')){
-        socket.emit('myChats', { userId : localStorage.getItem('userId')});
+      if(socket && userId){
+        socket.emit('myChats', { userId : userId});
         socket.on('my-chats-reply', (chats) => {
           setMyChats(chats);
           socket.emit('browseUsers');
           socket.on('browse-users-reply', (allUsers) => {
             setMyEmptyChats(allUsers.filter((user) => {
-              if(user._id == localStorage.getItem('userId'))
+              if(user._id == userId)
                 return false;
               const hasPrivateChat = chats.some((chat) => {
                 return (
                   chat.users.length === 2 &&
-                  chat.users.includes(String(localStorage.getItem('userId'))) &&
-                  chat.users.includes(String(user._id))
+                  chat.users.includes(userId) &&
+                  chat.users.includes(userId)
                 );
               });
         
@@ -83,7 +92,7 @@ const Chat = () => {
     setError('');
   if (messageInput.trim() && chatId) {
     const newMessage = {
-      sender: localStorage.getItem('userId'),
+      sender: userId,
       chat: chatId,
       content: messageInput.trim(),
     };
@@ -113,7 +122,7 @@ const Chat = () => {
   const handleBrowseUsers = () => {
     setError('');
     socket.emit('browseUsers');
-    socket.on('browse-users-reply', (allUsers) => setUsers(allUsers.filter((user) => user._id !== localStorage.getItem('userId'))));
+    socket.on('browse-users-reply', (allUsers) => setUsers(allUsers.filter((user) => user._id !== userId)));
   }
   
   const handleUserClick = (userId) => {
@@ -130,7 +139,7 @@ const Chat = () => {
     if(groupName && groupUsers){
       const newGroup = {
         name : groupName,
-        users : [...groupUsers, localStorage.getItem('userId')]
+        users : [...groupUsers, userId]
       }
       socket.emit('createGroup', newGroup);
       socket.on('create-group-reply', (newGroupChat) => {setMyChats([...myChats, newGroupChat])});

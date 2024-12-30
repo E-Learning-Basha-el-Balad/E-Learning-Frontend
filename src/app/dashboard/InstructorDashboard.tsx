@@ -7,21 +7,22 @@ import InstructorDetailsPage from "./InstructorCourseDetails";
 import { FaArrowLeft, FaUserCircle } from 'react-icons/fa';
 import { Student } from "../types/student";
 import {Instructor} from "../types/Course"
-import { useRouter } from "next/navigation";
-
-
 import { Module } from "../types/Module";
+import InstructorProgressReport from '../progress/instructor/page'
+import Chat from "../Chat/ChatComponent";
+
 import ViewCourseAnnouncements from "../course-announcements/view/ViewCourseAnnouncements";
 import CreateCourseAnnouncementForm from "../course-announcements/create/form/CreateCourseAnnouncementForm";
 import DiscussionForum from "../discussions/main-component/DiscussionForum";
+import ReplyNotificationComponent from "../discussions/notification/NotifcationComponent";
 
-import InstructorProgressReport from "../progress/instructor/page";
 const ISDP = ({ student }: { student: Student }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [red, setRed] = useState<boolean | null>(null);
+  
 
   return (
     <div
@@ -151,13 +152,12 @@ const IDP = ({ instructor }: { instructor: Instructor | null }) => {
 
 
 const Dashboard = () => {
-  //changed
-  const router = useRouter();
   
   const [activeTab, setActiveTab] = useState<'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'createAnnouncement' | 'viewAnnouncements'>('courses');
   const [selectedForumCourse, setSelectedForumCourse] = useState<Course | null>(null);
-const [selectedAnnouncementCourse, setSelectedAnnouncementCourse] = useState<Course | null>(null);
-const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useState<Course | null>(null);
+  const [selectedAnnouncementCourse, setSelectedAnnouncementCourse] = useState<Course | null>(null);
+  const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useState<Course | null>(null);
+
   const [userData, setUserData] = useState<Instructor | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchCourses, setSearchCourses] = useState<Course[]>([]);
@@ -172,7 +172,7 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
 
   const handleStudentCardClick = (student: Student) => setSelectedStudent(student);
 
-
+ 
   const handleButtonClick = (tab: 'user info' | 'courses' | 'performance' | 'chat' | 'forums' | 'students' | 'createAnnouncement' | 'viewAnnouncements') => {
     setActiveTab(tab);
   };
@@ -192,6 +192,7 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
     setActiveTab('viewAnnouncements');
   };
 
+
   const setUser = (newUser: Instructor) => {
     setUserData(newUser);
   };
@@ -201,24 +202,15 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
       try {
         const response = await axios.get("http://localhost:3000/auth/userData", { withCredentials: true });
         if (response.status === 200) {
-          if(response.data.role!="instructor"){
-            router.push("/unauthorized"); 
-          }
-
-
-
           setUser(response.data);
-
-
-
-  
-           
         }
-      } catch (error: any) {
-        if (error.response?.status === 401) {
-          router.push("/unauthorized");
-          return;
-        }
+      } catch (error: unknown) {
+        if(error instanceof Error)
+          console.log(error.message);
+        // if (error.response?.status === 401) {
+        //   return;
+        // }
+        // console.error('Error fetching user data:', error.response?.data || error.message);
       }
     };
 
@@ -235,7 +227,6 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
     const fetchStudents = async () => {
       try {
         const response = await axios.get("http://localhost:3000/users/students", { withCredentials: true });
-        console.log(response.data)
         setStudents(response.data);
         setSearchStudents(response.data)
       } catch (err) {
@@ -261,9 +252,6 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
       );
       setSearchCourses(filteredCourses);
 
-      
-
-
     } else if (activeTab === 'students') {
       const filteredStudents = students.filter(
         (student) =>
@@ -272,7 +260,7 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
       setSearchStudents(filteredStudents);
     }
   };
-
+    
   return (
     <>
       <style>{`
@@ -536,6 +524,32 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
               Chats
             </button>
           </div>
+       
+           <div className="nav-item">
+            <button
+              onClick={() => handleButtonClick('forums')}
+              className={activeTab === 'forums' ? 'active' : ''}
+            >
+              Discussion Forums
+            </button>
+          </div>         
+          <div className="nav-item">
+            <button
+              onClick={() => handleButtonClick('createAnnouncement')}
+              className={activeTab === 'createAnnouncement' ? 'active' : ''}
+            >
+              Create Announcement
+            </button>
+            </div>
+            <div className="nav-item">
+            <button
+              onClick={() => handleButtonClick('viewAnnouncements')}
+              className={activeTab === 'viewAnnouncements' ? 'active' : ''}
+            >
+              View Announcements
+            </button>
+            </div>
+            {/* END */}
         </div>
       </div>
       {selectedCourse ? (
@@ -578,14 +592,12 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
            </div>
          </>
           )}
-
           {activeTab === 'performance' && (
                       <div>
                         <h1>Performance Tracking</h1>
                         <InstructorProgressReport />;
                       </div>
           )}
-
 
 {activeTab === 'user info' && (
   <>
@@ -645,36 +657,15 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
     )}
   </>
 )}
-{activeTab === 'forums' && (
-  <div>
-    <h1>Discussion Forums</h1>
-    {courses.length > 0 ? (
-      <div className="course-container">
-        {courses.map(course => (
-          <div
-            className="course-card"
-            key={course._id}
-            onClick={() => handleForumClick(course)} 
-          >
-            <div className="course-title">{course.title}</div>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p>You have not created any courses yet, create a course to access its forum.</p>
-    )}
-    {selectedForumCourse && (
-      <DiscussionForum
-        courseId={selectedForumCourse._id}
-        userId={userData?._id || ''}
-        userRole={userData?.role || ''}
-        courseName={selectedForumCourse.title}
-      />
-    )}
-  </div>
-)}
+    {activeTab === 'chat' && 
+    <div>
+      <Chat userId={userData?._id || ''} />
+    </div>
+  }
 
-{activeTab === 'createAnnouncement' && (
+
+
+    {activeTab === 'createAnnouncement' && (
   <div>
     <h1>Create Course Announcement</h1>
     {courses.length > 0 ? (
@@ -693,7 +684,7 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
       <p>You have not created any courses yet, create a course to make announcements.</p>
     )}
     {selectedAnnouncementCourse && userData && (
-      <CreateCourseAnnouncementForm instructorId={userData._id} />
+      <CreateCourseAnnouncementForm instructorId={userData._id} courseId={selectedAnnouncementCourse._id} />
     )}
   </div>
 )}
@@ -721,10 +712,40 @@ const [selectedViewAnnouncementCourse, setSelectedViewAnnouncementCourse] = useS
     )}
   </div>
 )}
-          
-          {activeTab === 'chat' && <div>Chat content goes here</div>}
+ {activeTab === 'forums' && (
+              <div>
+                <h1>Discussion Forums</h1>
+                {courses.length > 0 ? (
+                  <div className="course-container">
+                    {courses.map(course => (
+                      <div
+                        className="course-card"
+                        key={course._id}
+                        onClick={() => handleForumClick(course)} 
+                      >
+                        <div className="course-title">{course.title}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>You have not created any courses yet, create a course to access its forum.</p>
+                )}
+                {selectedForumCourse && (
+                  <DiscussionForum
+                    courseId={selectedForumCourse._id}
+                    userId={userData?._id || ''}
+                    userRole={userData?.role || ''}
+                    courseName={selectedForumCourse.title}
+
+                  />
+                )}
+              </div>
+            )}
         </div>
       )}
+     {userData && (
+      <ReplyNotificationComponent userId={userData._id} />
+     )}
     </>
   );
 };
